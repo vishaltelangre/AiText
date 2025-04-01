@@ -1,26 +1,35 @@
-function setFormDisabled(disabled) {
+function setFormDisabled(disabled, buttonType = 'both') {
   const elements = [
     document.getElementById("api-key"),
     document.getElementById("show-key"),
     document.getElementById("clear-key"),
-    document.getElementById("save")
+    document.getElementById("save"),
+    document.getElementById("test-key")
   ];
 
   elements.forEach(el => {
     el.disabled = disabled;
   });
 
-  const spinner = document.getElementById("save-spinner");
+  const saveSpinner = document.getElementById("save-spinner");
+  const testSpinner = document.getElementById("test-spinner");
+
   if (disabled) {
-    spinner.classList.remove("ait-hidden");
+    if (buttonType === 'save' || buttonType === 'both') {
+      saveSpinner.classList.remove("ait-hidden");
+    }
+    if (buttonType === 'test' || buttonType === 'both') {
+      testSpinner.classList.remove("ait-hidden");
+    }
   } else {
-    spinner.classList.add("ait-hidden");
+    saveSpinner.classList.add("ait-hidden");
+    testSpinner.classList.add("ait-hidden");
   }
 }
 
 function saveOptions(e) {
   e.preventDefault();
-  setFormDisabled(true);
+  setFormDisabled(true, 'save');
 
   const apiKey = document.getElementById("api-key").value.trim();
   const status = document.getElementById("status");
@@ -105,8 +114,69 @@ function showStatus(message, colorClass) {
   }, 3000);
 }
 
-document.addEventListener("DOMContentLoaded", restoreOptions);
-document.getElementById("api-key").addEventListener("input", toggleClearButton);
-document.getElementById("save").addEventListener("click", saveOptions);
-document.getElementById("show-key").addEventListener("click", toggleApiKeyVisibility);
-document.getElementById("clear-key").addEventListener("click", clearApiKey);
+async function testApiKey() {
+  const apiKey = document.getElementById("api-key").value.trim();
+  if (!apiKey) {
+    showStatus("Please enter an API key first", "ait-text-red-600");
+    return;
+  }
+
+  setFormDisabled(true, 'test');
+  const modelId = "gemini-2.0-flash-lite";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+
+  const requestBody = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: "Test"
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.7,
+      responseMimeType: "text/plain"
+    }
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || response.statusText);
+    }
+
+    showStatus("API key is valid!", "ait-text-green-600");
+  } catch (error) {
+    showStatus(error.message, "ait-text-red-600");
+  } finally {
+    setFormDisabled(false);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  restoreOptions();
+
+  // Add event listeners
+  document.getElementById("api-key").addEventListener("input", toggleClearButton);
+  document.getElementById("save").addEventListener("click", saveOptions);
+  document.getElementById("show-key").addEventListener("click", toggleApiKeyVisibility);
+  document.getElementById("clear-key").addEventListener("click", clearApiKey);
+  document.getElementById("test-key").addEventListener("click", testApiKey);
+
+  // Prevent form submission
+  document.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    saveOptions(e);
+  });
+});

@@ -113,34 +113,64 @@
         >
           <div class="ait-flex ait-items-center ait-justify-between">
             <div id="status" class="ait-text-sm"></div>
-            <button
-              type="submit"
-              id="save"
-              class="ait-px-4 ait-py-2 ait-bg-primary hover:ait-bg-primary-hover ait-text-white ait-rounded-md ait-shadow-sm ait-text-sm ait-font-medium ait-transition-colors disabled:ait-opacity-50 disabled:hover:ait-bg-primary disabled:ait-cursor-not-allowed ait-flex ait-items-center ait-gap-2"
-            >
-              <svg
-                id="save-spinner"
-                class="ait-w-4 ait-h-4 ait-animate-spin ait-hidden"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+            <div class="ait-flex ait-gap-3">
+              <button
+                type="submit"
+                id="save"
+                class="ait-flex-1 ait-flex ait-items-center ait-justify-center ait-gap-2 ait-bg-primary hover:ait-bg-primary-hover ait-text-white ait-px-4 ait-py-2 ait-rounded-md ait-text-sm ait-font-medium disabled:ait-opacity-50 disabled:ait-cursor-not-allowed"
               >
-                <circle
-                  class="ait-opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="ait-opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <span>Save Changes</span>
-            </button>
+                <span>Save</span>
+                <svg
+                  id="save-spinner"
+                  class="ait-hidden ait-w-4 ait-h-4 ait-animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="ait-opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="ait-opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="test-key"
+                class="ait-flex ait-items-center ait-justify-center ait-gap-2 ait-bg-gray-100 hover:ait-bg-gray-200 ait-text-gray-700 ait-px-4 ait-py-2 ait-rounded-md ait-text-sm ait-font-medium disabled:ait-opacity-50 disabled:ait-cursor-not-allowed"
+              >
+                <span>Test connection</span>
+                <svg
+                  id="test-spinner"
+                  class="ait-hidden ait-w-4 ait-h-4 ait-animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="ait-opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="ait-opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </form>
