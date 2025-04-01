@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ai Text</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ai Text</h1>
+
+      <div class="info-card">
+        <p>
+          Select text on any webpage, right-click, and choose an enhancement
+          option from the "Ai Text" menu.
+        </p>
+
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">✏️</div>
+            <div class="feature-text">Fix Grammar</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🔄</div>
+            <div class="feature-text">Rephrase</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">👔</div>
+            <div class="feature-text">Formalize</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">📝</div>
+            <div class="feature-text">Simplify</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">Summarize</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="api-status" class="api-status">
+        <div class="status-icon">⚙️</div>
+        <div class="status-text">Checking API key...</div>
+      </div>
+
+      <div class="footer">
+        <button id="options-button" class="options-button">Settings</button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

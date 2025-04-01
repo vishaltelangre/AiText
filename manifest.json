@@ -1,0 +1,40 @@
+{
+  "manifest_version": 2,
+  "name": "AiText",
+  "version": "1.0",
+  "description": "Enhance selected text with AI",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ai-text-firefox@vishaltelangre.com"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "browser_action": {
+    "default_icon": "icons/icon-48.png",
+    "default_title": "AiText",
+    "default_popup": "popup/popup.html"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Ai Text Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ai Text Options</h1>
+
+      <div class="option-group">
+        <label for="api-key">Gemini API Key</label>
+        <input
+          type="password"
+          id="api-key"
+          placeholder="Enter your Gemini API key"
+        />
+        <button id="show-key" class="icon-button">👁️</button>
+        <p class="help-text">
+          Your API key is stored locally on your device and is only used to make
+          requests to the Gemini API.
+          <a href="https://aistudio.google.com/app/apikey" target="_blank"
+            >Get a Gemini API key</a
+          >
+        </p>
+      </div>
+
+      <div class="actions">
+        <button id="save" class="primary-button">Save</button>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>How to Use Ai Text</h2>
+        <ol>
+          <li>Select any text on a webpage</li>
+          <li>Right-click to open the context menu</li>
+          <li>Navigate to "Ai Text" submenu</li>
+          <li>Choose an enhancement option</li>
+          <li>Review the enhanced text</li>
+          <li>Apply the changes or cancel</li>
+        </ol>
+      </div>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>
