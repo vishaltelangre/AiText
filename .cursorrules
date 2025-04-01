@@ -1,0 +1,6 @@
+{
+  "tailwind": {
+    "prefix": "ait-",
+    "config": "tailwind.config.js"
+  }
+}

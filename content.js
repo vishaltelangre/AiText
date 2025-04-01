@@ -1,147 +1,22 @@
+// Define spinner animation styles
 const styles = `
-.ai-text-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-}
-
-.ai-text-modal {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.ai-text-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eaeaea;
-  background-color: #f9fafb;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-}
-
-.ai-text-title {
-  font-weight: 600;
-  font-size: 1.125rem;
-  color: #1f2937;
-}
-
-.ai-text-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  font-size: 1.25rem;
-  transition: color 0.2s;
-}
-
-.ai-text-close:hover {
-  color: #ef4444;
-}
-
-.ai-text-content {
-  padding: 1.5rem;
-}
-
-.ai-text-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #4b5563;
-}
-
-.ai-text-textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-  font-family: inherit;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  resize: vertical;
-}
-
-.ai-text-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.ai-text-button {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.ai-text-primary {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-}
-
-.ai-text-primary:hover {
-  background-color: #2563eb;
-}
-
-.ai-text-secondary {
-  background-color: white;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
-}
-
-.ai-text-secondary:hover {
-  background-color: #f9fafb;
-}
-
-.ai-text-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-}
-
-.ai-text-spinner {
-  border: 3px solid rgba(209, 213, 219, 0.3);
-  border-radius: 50%;
-  border-top-color: #3b82f6;
-  width: 2rem;
-  height: 2rem;
-  animation: spinner 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
 @keyframes spinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.ai-text-error {
-  color: #ef4444;
-  padding: 1rem;
-  border: 1px solid #fca5a5;
-  background-color: #fee2e2;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
+.ait-text-spinner {
+  animation: spinner 1s linear infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ait-modal-animate {
+  animation: fadeIn 0.2s ease-out;
 }`;
 
 const styleEl = document.createElement("style");
@@ -165,13 +40,14 @@ browser.runtime.onMessage.addListener((message) => {
     browser.runtime.sendMessage({
       action: "callAiApi",
       text: message.text,
-      instruction: message.instruction
+      instruction: message.instruction,
+      enhancementType: message.enhancementType
     });
   } else if (message.action === "replaceText") {
     // Remove loading overlay
     removeOverlay();
     // Show result modal
-    showResultModal(message.originalText, message.result);
+    showResultModal(message.originalText, message.result, message.enhancementType);
   } else if (message.action === "showError") {
     // Remove loading overlay
     removeOverlay();
@@ -181,101 +57,195 @@ browser.runtime.onMessage.addListener((message) => {
 });
 
 function showLoadingOverlay(enhancementType) {
-  // Create overlay
   const overlay = document.createElement("div");
-  overlay.className = "ai-text-overlay";
-  overlay.id = "ai-text-overlay";
+  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.id = "ait-text-overlay";
 
-  // Create loading content
+  const { loading } = getActionTitle(enhancementType);
+
   overlay.innerHTML = `
-  <div class="ai-text-modal">
-      <div class="ai-text-header">
-        <div class="ai-text-title">Enhancing text...</div>
-        <button class="ai-text-close" onclick="document.getElementById('ai-text-overlay').remove();">×</button>
+    <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate ait-overflow-hidden">
+      <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
+        <div class="ait-flex ait-items-center ait-gap-3">
+          <div class="ait-text-primary">
+            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${loading}</div>
+        </div>
+        <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
+          <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
-      <div class="ai-text-loading">
-        <div class="ai-text-spinner"></div>
-        <div>${getTitleFromType(enhancementType)} in progress...</div>
+      <div class="ait-flex ait-flex-col ait-items-center ait-p-12">
+        <div class="ait-w-10 ait-h-10 ait-border-4 ait-border-gray-200 ait-border-t-primary ait-rounded-full ait-text-spinner ait-mb-6"></div>
+        <div class="ait-text-gray-600 ait-font-medium">${loading}</div>
+        <div class="ait-text-gray-400 ait-text-sm ait-mt-2">This might take a few seconds...</div>
       </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
-
-  // Add close on escape key
   document.addEventListener("keydown", handleEscapeKey);
 }
 
-function showResultModal(originalText, enhancedText) {
-  // Create overlay
-  const overlay = document.createElement("div");
-  overlay.className = "ai-text-overlay";
-  overlay.id = "ai-text-overlay";
+function isEditableElement(element) {
+  if (!element) return false;
+  return element.isContentEditable ||
+         element.tagName === 'INPUT' ||
+         element.tagName === 'TEXTAREA';
+}
 
-  // Create modal content
+function getActionTitle(type) {
+  const titles = {
+    fixGrammar: {
+      action: "Enhanced with grammar fix",
+      loading: "Fixing grammar",
+    },
+    rephraseSentence: {
+      action: "Rephrased",
+      loading: "Rephrasing sentence",
+    },
+    formalize: {
+      action: "Formalized",
+      loading: "Formalizing text",
+    },
+    simplify: {
+      action: "Simplified",
+      loading: "Simplifying text",
+    },
+    summarize: {
+      action: "Summarized",
+      loading: "Summarizing text",
+    }
+  };
+
+  return titles[type] || { action: "Enhanced", loading: "Enhancing text" };
+}
+
+function showResultModal(originalText, enhancedText, enhancementType) {
+  const overlay = document.createElement("div");
+  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.id = "ait-text-overlay";
+
+  // Prevent background scroll when modal is open
+  document.body.style.overflow = 'hidden';
+
+  // Check if the selected text is from an editable element
+  const isEditable = selectedRange && isEditableElement(selectedRange.startContainer.parentElement);
+
+  // Get the action-specific title
+  const { action } = getActionTitle(enhancementType);
+
   overlay.innerHTML = `
-    <div class="ai-text-modal">
-      <div class="ai-text-header">
-        <div class="ai-text-title">Enhanced text</div>
-        <button class="ai-text-close" onclick="document.getElementById('ai-text-overlay').remove();">×</button>
+    <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[1000px] ait-max-h-[85vh] ait-flex ait-flex-col ait-modal-animate ait-overflow-hidden">
+      <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
+        <div class="ait-flex ait-items-center ait-gap-3">
+          <div class="ait-text-primary">
+            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${action}</div>
+        </div>
+        <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
+          <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
-      <div class="ai-text-content">
-        <div>
-          <label class="ai-text-label">Original Text:</label>
-          <textarea class="ai-text-textarea" readonly>${originalText}</textarea>
+      <div class="ait-grid ait-grid-cols-2 ait-min-h-0 ait-flex-1 ait-divide-x ait-divide-gray-200">
+        <div class="ait-overflow-hidden ait-flex ait-flex-col">
+          <div class="ait-flex ait-items-center ait-gap-2 ait-px-6 ait-py-3 ait-shrink-0 ait-bg-gray-50/80 ait-border-y ait-border-gray-200">
+            <svg class="ait-w-4 ait-h-4 ait-text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+            <h3 class="ait-font-medium ait-text-gray-700">Original</h3>
+          </div>
+          <div class="ait-overflow-y-auto ait-px-6 ait-py-4 ait-grow">
+            <div class="ait-prose ait-prose-sm ait-max-w-none ait-text-gray-600 ait-mx-auto ait-max-w-[450px]">
+              ${originalText.split('\n').map(line => `<p>${line || '<br/>'}</p>`).join('')}
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="ai-text-label">Enhanced Text:</label>
-          <textarea id="enhanced-text" class="ai-text-textarea">${enhancedText}</textarea>
-        </div>
-        <div class="ai-text-actions">
-          <button class="ai-text-button ai-text-secondary" onclick="document.getElementById('ai-text-overlay').remove();">Cancel</button>
-          <button class="ai-text-button ai-text-primary" id="apply-button">Apply Changes</button>
+        <div class="ait-overflow-hidden ait-flex ait-flex-col">
+          <div class="ait-flex ait-items-center ait-gap-2 ait-px-6 ait-py-3 ait-shrink-0 ait-bg-gray-50/80 ait-border-y ait-border-gray-200">
+            <svg class="ait-w-4 ait-h-4 ait-text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <h3 class="ait-font-medium ait-text-gray-700">Updated</h3>
+          </div>
+          <div class="ait-overflow-y-auto ait-px-6 ait-py-4 ait-grow">
+            <div id="ait-enhanced-text" class="ait-prose ait-prose-sm ait-max-w-none ait-text-gray-800 ait-mx-auto ait-max-w-[450px]">
+              ${enhancedText.split('\n').map(line => `<p>${line || '<br/>'}</p>`).join('')}
+            </div>
+          </div>
         </div>
       </div>
+      ${isEditable ? `
+        <div class="ait-flex ait-justify-end ait-gap-3 ait-px-6 ait-py-4 ait-bg-gray-50 ait-border-t ait-border-gray-200 ait-shrink-0">
+          <button class="ait-px-4 ait-py-2 ait-rounded-lg ait-text-sm ait-font-medium ait-text-gray-700 ait-bg-white ait-border ait-border-gray-200 hover:ait-bg-gray-50 hover:ait-border-gray-300 ait-transition-colors focus:ait-ring-2 focus:ait-ring-gray-200" onclick="document.getElementById('ait-text-overlay').remove();">Cancel</button>
+          <button class="ait-px-4 ait-py-2 ait-rounded-lg ait-text-sm ait-font-medium ait-text-white ait-bg-primary hover:ait-bg-primary-hover ait-transition-colors focus:ait-ring-2 focus:ait-ring-primary/50 focus:ait-ring-offset-2" id="ait-apply-button">
+            Apply Changes
+          </button>
+        </div>
+      ` : ''}
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  // Add event listener to apply button
-  document.getElementById("apply-button").addEventListener("click", () => {
-    const newText = document.getElementById("enhanced-text").value;
-    replaceSelectedText(newText);
-    removeOverlay();
-  });
+  if (isEditable) {
+    document.getElementById("ait-apply-button").addEventListener("click", () => {
+      const newText = document.getElementById("ait-enhanced-text").textContent;
+      replaceSelectedText(newText);
+      removeOverlay();
+    });
+  }
 
-  // Add close on escape key
   document.addEventListener("keydown", handleEscapeKey);
 }
 
 function showErrorModal(errorMessage) {
-  // Create overlay
   const overlay = document.createElement("div");
-  overlay.className = "ai-text-overlay";
-  overlay.id = "ai-text-overlay";
+  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.id = "ait-text-overlay";
 
-  // Create modal content
   overlay.innerHTML = `
-    <div class="ai-text-modal">
-      <div class="ai-text-header">
-        <div class="ai-text-title">Error</div>
-        <button class="ai-text-close" onclick="document.getElementById('ai-text-overlay').remove();">×</button>
-      </div>
-      <div class="ai-text-content">
-        <div class="ai-text-error">
-          ${errorMessage}
+    <div class="ait-bg-white ait-rounded-xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate">
+      <div class="ait-flex ait-justify-between ait-items-center ait-p-6 ait-border-b ait-border-gray-100">
+        <div class="ait-flex ait-items-center ait-gap-3">
+          <div class="ait-text-red-500">
+            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ait-font-semibold ait-text-lg ait-text-gray-800">Error</div>
         </div>
-        <div class="ai-text-actions">
-          <button class="ai-text-button ai-text-primary" onclick="document.getElementById('ai-text-overlay').remove();">Close</button>
+        <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
+          <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ait-p-6">
+        <div class="ait-flex ait-items-start ait-gap-3 ait-text-red-600 ait-p-4 ait-border ait-border-red-100 ait-bg-red-50 ait-rounded-lg ait-mb-4">
+          <svg class="ait-w-5 ait-h-5 ait-mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>${errorMessage}</div>
+        </div>
+        <div class="ait-flex ait-justify-end">
+          <button class="ait-px-4 ait-py-2 ait-rounded-lg ait-text-sm ait-font-medium ait-text-gray-700 ait-bg-white ait-border ait-border-gray-200 hover:ait-bg-gray-50 hover:ait-border-gray-300 ait-transition-colors focus:ait-ring-2 focus:ait-ring-gray-200" onclick="document.getElementById('ait-text-overlay').remove();">Close</button>
         </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
-
-  // Add close on escape key
   document.addEventListener("keydown", handleEscapeKey);
 }
 
@@ -287,10 +257,12 @@ function replaceSelectedText(newText) {
 }
 
 function removeOverlay() {
-  const overlay = document.getElementById("ai-text-overlay");
+  const overlay = document.getElementById("ait-text-overlay");
   if (overlay) {
     overlay.remove();
     document.removeEventListener("keydown", handleEscapeKey);
+    // Re-enable background scroll
+    document.body.style.overflow = '';
   }
 }
 
@@ -298,16 +270,4 @@ function handleEscapeKey(e) {
   if (e.key === "Escape") {
     removeOverlay();
   }
-}
-
-function getTitleFromType(type) {
-  const titles = {
-    fixGrammar: "Fixing grammar",
-    rephraseSentence: "Rephrasing sentence",
-    formalize: "Formalizing text",
-    simplify: "Simplifying text",
-    summarize: "Summarizing text",
-  };
-
-  return titles[type] || "Enhancing text";
 }

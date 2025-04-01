@@ -1,35 +1,32 @@
 function checkApiKey() {
-  const apiStatus = document.getElementById("api-status");
-
-  apiStatus.className = "api-status api-checking";
-  apiStatus.innerHTML = `
-    <div class="status-icon">⚙️</div>
-    <div class="status-text">Checking API key...</div>
-  `;
+  const statusContainer = document.getElementById('api-status-container');
+  const statusText = document.getElementById('api-status-text');
+  const successIcon = document.getElementById('status-icon-success');
+  const errorIcon = document.getElementById('status-icon-error');
 
   browser.storage.sync
     .get("geminiApiKey")
     .then((res) => {
       if (res.geminiApiKey) {
-        apiStatus.className = "api-status api-ok";
-        apiStatus.innerHTML = `
-        <div class="status-icon">✅</div>
-        <div class="status-text">API key configured and ready</div>
-      `;
+        statusContainer.className = 'ait-flex ait-items-center ait-justify-between ait-bg-green-50 ait-border ait-border-green-100 ait-rounded-lg ait-px-4 ait-py-2.5 ait-mt-4';
+        statusText.className = 'ait-text-sm ait-text-green-700';
+        successIcon.classList.remove('ait-hidden');
+        errorIcon.classList.add('ait-hidden');
+        statusText.textContent = 'API key configured';
       } else {
-        apiStatus.className = "api-status api-missing";
-        apiStatus.innerHTML = `
-        <div class="status-icon">⚠️</div>
-        <div class="status-text">API key not set. Click Settings to configure.</div>
-      `;
+        statusContainer.className = 'ait-flex ait-items-center ait-justify-between ait-bg-red-100/50 ait-border ait-border-red-200 ait-rounded-lg ait-px-4 ait-py-2.5 ait-mt-4';
+        statusText.className = 'ait-text-sm ait-text-red-700';
+        successIcon.classList.add('ait-hidden');
+        errorIcon.classList.remove('ait-hidden');
+        statusText.textContent = 'API key not set';
       }
     })
     .catch((error) => {
-      apiStatus.className = "api-status api-missing";
-      apiStatus.innerHTML = `
-      <div class="status-icon">❌</div>
-      <div class="status-text">Error checking API key: ${error}</div>
-    `;
+      statusContainer.className = 'ait-flex ait-items-center ait-justify-between ait-bg-red-100/50 ait-border ait-border-red-200 ait-rounded-lg ait-px-4 ait-py-2.5 ait-mt-4';
+      statusText.className = 'ait-text-sm ait-text-red-700';
+      successIcon.classList.add('ait-hidden');
+      errorIcon.classList.remove('ait-hidden');
+      statusText.textContent = 'Error checking API key';
     });
 }
 

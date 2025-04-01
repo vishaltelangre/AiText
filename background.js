@@ -77,7 +77,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         browser.tabs.sendMessage(sender.tab.id, {
           action: "replaceText",
           result: result,
-          originalText: message.text
+          originalText: message.text,
+          enhancementType: message.enhancementType
         });
       })
       .catch(error => {
