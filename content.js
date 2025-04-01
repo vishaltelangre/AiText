@@ -67,11 +67,7 @@ function showLoadingOverlay(enhancementType) {
     <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate ait-overflow-hidden">
       <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <div class="ait-text-primary">
-            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
+          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${loading}</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
@@ -144,11 +140,7 @@ function showResultModal(originalText, enhancedText, enhancementType) {
     <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[1000px] ait-max-h-[85vh] ait-flex ait-flex-col ait-modal-animate ait-overflow-hidden">
       <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <div class="ait-text-primary">
-            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
+          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${action}</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
@@ -218,11 +210,7 @@ function showErrorModal(errorMessage) {
     <div class="ait-bg-white ait-rounded-xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate">
       <div class="ait-flex ait-justify-between ait-items-center ait-p-6 ait-border-b ait-border-gray-100">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <div class="ait-text-red-500">
-            <svg class="ait-w-5 ait-h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
+          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">Error</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">

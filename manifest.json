@@ -34,6 +34,7 @@
     "default_title": "AiText",
     "default_popup": "popup/popup.html"
   },
+  "web_accessible_resources": ["icons/*"],
   "options_ui": {
     "page": "options/options.html",
     "browser_style": true
