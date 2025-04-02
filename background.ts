@@ -1,5 +1,12 @@
+import type {
+  MenuItem,
+  Message,
+  GeminiApiResponse,
+  GeminiApiError,
+} from "./types";
+
 // Initialize and manage context menu items
-const menuItems = [
+const menuItems: MenuItem[] = [
   {
     id: "fixGrammar",
     title: "Fix Grammar",
@@ -38,7 +45,7 @@ browser.runtime.onInstalled.addListener(() => {
   browser.contextMenus.create({
     id: "ai-text",
     title: "AiText",
-    contexts: ["selection"]
+    contexts: ["selection"],
   });
 
   // Create child menu items
@@ -54,8 +61,8 @@ browser.runtime.onInstalled.addListener(() => {
 
 // Listen for context menu clicks
 browser.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.selectionText) {
-    const menuItem = menuItems.find(item => item.id === info.menuItemId);
+  if (info.selectionText && tab?.id) {
+    const menuItem = menuItems.find((item) => item.id === info.menuItemId);
 
     if (menuItem) {
       // Send message to content script with the selected text and instruction
@@ -63,45 +70,57 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
         action: "enhanceText",
         text: info.selectionText,
         instruction: menuItem.instruction,
-        enhancementType: menuItem.id
+        enhancementType: menuItem.id,
       });
     }
   }
 });
 
 // Listen for messages from content script
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "callAiApi") {
-    callAiApi(message.text, message.instruction)
-      .then(result => {
-        browser.tabs.sendMessage(sender.tab.id, {
-          action: "replaceText",
-          result: result,
-          originalText: message.text,
-          enhancementType: message.enhancementType
+browser.runtime.onMessage.addListener(
+  (message: Message, sender, sendResponse) => {
+    if (
+      message.action === "callAiApi" &&
+      message.text &&
+      message.instruction &&
+      sender.tab?.id
+    ) {
+      const tabId = sender.tab.id;
+      callAiApi(message.text, message.instruction)
+        .then((result) => {
+          browser.tabs.sendMessage(tabId, {
+            action: "replaceText",
+            result: result,
+            originalText: message.text,
+            enhancementType: message.enhancementType,
+          });
+        })
+        .catch((error) => {
+          browser.tabs.sendMessage(tabId, {
+            action: "showError",
+            error: error.message,
+          });
         });
-      })
-      .catch(error => {
-        browser.tabs.sendMessage(sender.tab.id, {
-          action: "showError",
-          error: error.message
-        });
-      });
+    }
+    return true;
   }
-  return true;
-});
+);
 
-
-function callAiApi(text, instruction) {
+function callAiApi(text: string, instruction: string): Promise<string> {
   return callGeminiApi(text, instruction);
 }
 
-async function callGeminiApi(text, instruction) {
+async function callGeminiApi(
+  text: string,
+  instruction: string
+): Promise<string> {
   const data = await browser.storage.sync.get("geminiApiKey");
   const apiKey = data.geminiApiKey;
 
   if (!apiKey) {
-    throw new Error("Gemini API key not set. Please configure it in the extension options.");
+    throw new Error(
+      "Gemini API key not set. Please configure it in the extension options."
+    );
   }
 
   const modelId = "gemini-2.0-flash-lite";
@@ -113,37 +132,39 @@ async function callGeminiApi(text, instruction) {
         role: "user",
         parts: [
           {
-            text: text
-          }
-        ]
-      }
+            text: text,
+          },
+        ],
+      },
     ],
     systemInstruction: {
       parts: [
         {
-          text: instruction
-        }
-      ]
+          text: instruction,
+        },
+      ],
     },
     generationConfig: {
       temperature: 0.7,
-      responseMimeType: "text/plain"
-    }
+      responseMimeType: "text/plain",
+    },
   };
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+    const errorData = (await response.json()) as GeminiApiError;
+    throw new Error(
+      `API Error: ${errorData.error?.message || response.statusText}`
+    );
   }
 
-  const responseData = await response.json();
+  const responseData = (await response.json()) as GeminiApiResponse;
   return responseData.candidates[0].content.parts[0].text;
 }

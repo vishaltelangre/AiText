@@ -1,14 +1,25 @@
 {
   "name": "ai-text",
   "version": "1.0.0",
-  "description": "AI Text Enhancement Browser Extension",
+  "description": "Enhance text with AI",
   "scripts": {
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css",
-    "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch"
+    "build:ts": "webpack --config webpack.config.js",
+    "build": "pnpm build:css && pnpm build:ts",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "watch:ts": "webpack --config webpack.config.js --watch",
+    "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:ts\"",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.1",
+    "@types/firefox-webext-browser": "^120.0.4",
     "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35"
+    "concurrently": "^9.1.2",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
   }
 }

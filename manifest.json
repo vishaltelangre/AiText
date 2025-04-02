@@ -20,13 +20,13 @@
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["dist/background.js"]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "css": ["dist/output.css"],
-      "js": ["content.js"]
+      "js": ["dist/content.js"]
     }
   ],
   "browser_action": {

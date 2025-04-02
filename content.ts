@@ -1,3 +1,5 @@
+import type { Message, EnhancementType, ActionTitle } from "./types";
+
 // Define spinner animation styles
 const styles = `
 @keyframes spinner {
@@ -24,14 +26,18 @@ styleEl.textContent = styles;
 document.head.appendChild(styleEl);
 
 let selectedText = "";
-let selectedRange = null;
+let selectedRange: Range | null = null;
 
 // Listen for messages from background script
-browser.runtime.onMessage.addListener((message) => {
-  if (message.action === "enhanceText") {
+browser.runtime.onMessage.addListener((message: Message) => {
+  if (
+    message.action === "enhanceText" &&
+    message.text &&
+    message.enhancementType
+  ) {
     // Store the selected text and range
     selectedText = message.text;
-    selectedRange = window.getSelection().getRangeAt(0);
+    selectedRange = window.getSelection()?.getRangeAt(0) || null;
 
     // Create loading overlay
     showLoadingOverlay(message.enhancementType);
@@ -41,14 +47,23 @@ browser.runtime.onMessage.addListener((message) => {
       action: "callAiApi",
       text: message.text,
       instruction: message.instruction,
-      enhancementType: message.enhancementType
+      enhancementType: message.enhancementType,
     });
-  } else if (message.action === "replaceText") {
+  } else if (
+    message.action === "replaceText" &&
+    message.result &&
+    message.originalText &&
+    message.enhancementType
+  ) {
     // Remove loading overlay
     removeOverlay();
     // Show result modal
-    showResultModal(message.originalText, message.result, message.enhancementType);
-  } else if (message.action === "showError") {
+    showResultModal(
+      message.originalText,
+      message.result,
+      message.enhancementType
+    );
+  } else if (message.action === "showError" && message.error) {
     // Remove loading overlay
     removeOverlay();
     // Show error modal
@@ -56,9 +71,10 @@ browser.runtime.onMessage.addListener((message) => {
   }
 });
 
-function showLoadingOverlay(enhancementType) {
+function showLoadingOverlay(enhancementType: EnhancementType): void {
   const overlay = document.createElement("div");
-  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.className =
+    "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
   overlay.id = "ait-text-overlay";
 
   const { loading } = getActionTitle(enhancementType);
@@ -67,7 +83,9 @@ function showLoadingOverlay(enhancementType) {
     <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate ait-overflow-hidden">
       <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
+          <img src="${browser.runtime.getURL(
+            "icons/icon-48.png"
+          )}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${loading}</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
@@ -88,15 +106,18 @@ function showLoadingOverlay(enhancementType) {
   document.addEventListener("keydown", handleEscapeKey);
 }
 
-function isEditableElement(element) {
+function isEditableElement(element: Element | null): boolean {
   if (!element) return false;
-  return element.isContentEditable ||
-         element.tagName === 'INPUT' ||
-         element.tagName === 'TEXTAREA';
+  const htmlElement = element as HTMLElement;
+  return (
+    htmlElement.isContentEditable ||
+    element.tagName === "INPUT" ||
+    element.tagName === "TEXTAREA"
+  );
 }
 
-function getActionTitle(type) {
-  const titles = {
+function getActionTitle(type: EnhancementType): ActionTitle {
+  const titles: Record<EnhancementType, ActionTitle> = {
     fixGrammar: {
       action: "Enhanced with grammar fix",
       loading: "Fixing grammar",
@@ -116,22 +137,29 @@ function getActionTitle(type) {
     summarize: {
       action: "Summarized",
       loading: "Summarizing text",
-    }
+    },
   };
 
   return titles[type] || { action: "Enhanced", loading: "Enhancing text" };
 }
 
-function showResultModal(originalText, enhancedText, enhancementType) {
+function showResultModal(
+  originalText: string,
+  enhancedText: string,
+  enhancementType: EnhancementType
+): void {
   const overlay = document.createElement("div");
-  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.className =
+    "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
   overlay.id = "ait-text-overlay";
 
   // Prevent background scroll when modal is open
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = "hidden";
 
   // Check if the selected text is from an editable element
-  const isEditable = selectedRange && isEditableElement(selectedRange.startContainer.parentElement);
+  const isEditable =
+    selectedRange &&
+    isEditableElement(selectedRange.startContainer.parentElement);
 
   // Get the action-specific title
   const { action } = getActionTitle(enhancementType);
@@ -140,7 +168,9 @@ function showResultModal(originalText, enhancedText, enhancementType) {
     <div class="ait-bg-white ait-rounded-2xl ait-shadow-2xl ait-w-[90%] ait-max-w-[1000px] ait-max-h-[85vh] ait-flex ait-flex-col ait-modal-animate ait-overflow-hidden">
       <div class="ait-flex ait-justify-between ait-items-center ait-px-6 ait-py-4 ait-bg-gray-50">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
+          <img src="${browser.runtime.getURL(
+            "icons/icon-48.png"
+          )}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">${action}</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
@@ -159,7 +189,10 @@ function showResultModal(originalText, enhancedText, enhancementType) {
           </div>
           <div class="ait-overflow-y-auto ait-px-6 ait-py-4 ait-grow">
             <div class="ait-prose ait-prose-sm ait-max-w-none ait-text-gray-600 ait-mx-auto ait-max-w-[450px]">
-              ${originalText.split('\n').map(line => `<p>${line || '<br/>'}</p>`).join('')}
+              ${originalText
+                .split("\n")
+                .map((line) => `<p>${line || "<br/>"}</p>`)
+                .join("")}
             </div>
           </div>
         </div>
@@ -172,45 +205,62 @@ function showResultModal(originalText, enhancedText, enhancementType) {
           </div>
           <div class="ait-overflow-y-auto ait-px-6 ait-py-4 ait-grow">
             <div id="ait-enhanced-text" class="ait-prose ait-prose-sm ait-max-w-none ait-text-gray-800 ait-mx-auto ait-max-w-[450px]">
-              ${enhancedText.split('\n').map(line => `<p>${line || '<br/>'}</p>`).join('')}
+              ${enhancedText
+                .split("\n")
+                .map((line) => `<p>${line || "<br/>"}</p>`)
+                .join("")}
             </div>
           </div>
         </div>
       </div>
-      ${isEditable ? `
+      ${
+        isEditable
+          ? `
         <div class="ait-flex ait-justify-end ait-gap-3 ait-px-6 ait-py-4 ait-bg-gray-50 ait-border-t ait-border-gray-200 ait-shrink-0">
           <button class="ait-px-4 ait-py-2 ait-rounded-lg ait-text-sm ait-font-medium ait-text-gray-700 ait-bg-white ait-border ait-border-gray-200 hover:ait-bg-gray-50 hover:ait-border-gray-300 ait-transition-colors focus:ait-ring-2 focus:ait-ring-gray-200" onclick="document.getElementById('ait-text-overlay').remove();">Cancel</button>
           <button class="ait-px-4 ait-py-2 ait-rounded-lg ait-text-sm ait-font-medium ait-text-white ait-bg-primary hover:ait-bg-primary-hover ait-transition-colors focus:ait-ring-2 focus:ait-ring-primary/50 focus:ait-ring-offset-2" id="ait-apply-button">
             Apply Changes
           </button>
         </div>
-      ` : ''}
+      `
+          : ""
+      }
     </div>
   `;
 
   document.body.appendChild(overlay);
 
   if (isEditable) {
-    document.getElementById("ait-apply-button").addEventListener("click", () => {
-      const newText = document.getElementById("ait-enhanced-text").textContent;
-      replaceSelectedText(newText);
-      removeOverlay();
-    });
+    const applyButton = document.getElementById("ait-apply-button");
+    if (applyButton) {
+      applyButton.addEventListener("click", () => {
+        const enhancedTextElement =
+          document.getElementById("ait-enhanced-text");
+        if (enhancedTextElement) {
+          const newText = enhancedTextElement.textContent || "";
+          replaceSelectedText(newText);
+          removeOverlay();
+        }
+      });
+    }
   }
 
   document.addEventListener("keydown", handleEscapeKey);
 }
 
-function showErrorModal(errorMessage) {
+function showErrorModal(errorMessage: string): void {
   const overlay = document.createElement("div");
-  overlay.className = "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
+  overlay.className =
+    "ait-fixed ait-inset-0 ait-bg-gray-900/75 ait-backdrop-blur-sm ait-flex ait-justify-center ait-items-center ait-z-[10000]";
   overlay.id = "ait-text-overlay";
 
   overlay.innerHTML = `
     <div class="ait-bg-white ait-rounded-xl ait-shadow-2xl ait-w-[90%] ait-max-w-[600px] ait-modal-animate">
       <div class="ait-flex ait-justify-between ait-items-center ait-p-6 ait-border-b ait-border-gray-100">
         <div class="ait-flex ait-items-center ait-gap-3">
-          <img src="${browser.runtime.getURL('icons/icon-48.png')}" alt="AiText" class="ait-w-5 ait-h-5" />
+          <img src="${browser.runtime.getURL(
+            "icons/icon-48.png"
+          )}" alt="AiText" class="ait-w-5 ait-h-5" />
           <div class="ait-font-semibold ait-text-lg ait-text-gray-800">Error</div>
         </div>
         <button class="ait-text-gray-400 hover:ait-text-gray-600 ait-transition-colors ait-p-1 hover:ait-bg-gray-100 ait-rounded-lg" onclick="document.getElementById('ait-text-overlay').remove();">
@@ -237,24 +287,24 @@ function showErrorModal(errorMessage) {
   document.addEventListener("keydown", handleEscapeKey);
 }
 
-function replaceSelectedText(newText) {
+function replaceSelectedText(newText: string): void {
   if (selectedRange) {
     selectedRange.deleteContents();
     selectedRange.insertNode(document.createTextNode(newText));
   }
 }
 
-function removeOverlay() {
+function removeOverlay(): void {
   const overlay = document.getElementById("ait-text-overlay");
   if (overlay) {
     overlay.remove();
     document.removeEventListener("keydown", handleEscapeKey);
     // Re-enable background scroll
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }
 }
 
-function handleEscapeKey(e) {
+function handleEscapeKey(e: KeyboardEvent): void {
   if (e.key === "Escape") {
     removeOverlay();
   }

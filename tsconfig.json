@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "lib": ["ES2020", "DOM"],
+    "types": ["@types/firefox-webext-browser"]
+  },
+  "include": [
+    "*.ts",
+    "*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "popup/**/*.ts",
+    "popup/**/*.tsx",
+    "options/**/*.ts",
+    "options/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,38 +1,51 @@
-function setFormDisabled(disabled, buttonType = 'both') {
+import type { ButtonType, StorageData, GeminiApiError } from "../types";
+
+function setFormDisabled(
+  disabled: boolean,
+  buttonType: ButtonType = "both"
+): void {
   const elements = [
     document.getElementById("api-key"),
     document.getElementById("show-key"),
     document.getElementById("clear-key"),
     document.getElementById("save"),
-    document.getElementById("test-key")
-  ];
+    document.getElementById("test-key"),
+  ] as Array<HTMLInputElement | HTMLButtonElement | null>;
 
-  elements.forEach(el => {
-    el.disabled = disabled;
+  elements.forEach((el) => {
+    if (el) {
+      el.disabled = disabled;
+    }
   });
 
   const saveSpinner = document.getElementById("save-spinner");
   const testSpinner = document.getElementById("test-spinner");
 
   if (disabled) {
-    if (buttonType === 'save' || buttonType === 'both') {
-      saveSpinner.classList.remove("ait-hidden");
+    if (buttonType === "save" || buttonType === "both") {
+      saveSpinner?.classList.remove("ait-hidden");
     }
-    if (buttonType === 'test' || buttonType === 'both') {
-      testSpinner.classList.remove("ait-hidden");
+    if (buttonType === "test" || buttonType === "both") {
+      testSpinner?.classList.remove("ait-hidden");
     }
   } else {
-    saveSpinner.classList.add("ait-hidden");
-    testSpinner.classList.add("ait-hidden");
+    saveSpinner?.classList.add("ait-hidden");
+    testSpinner?.classList.add("ait-hidden");
   }
 }
 
-function saveOptions(e) {
+function saveOptions(e: Event): void {
   e.preventDefault();
-  setFormDisabled(true, 'save');
+  setFormDisabled(true, "save");
 
-  const apiKey = document.getElementById("api-key").value.trim();
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
   const status = document.getElementById("status");
+
+  if (!apiKeyInput || !status) {
+    return;
+  }
+
+  const apiKey = apiKeyInput.value.trim();
 
   // Allow empty API key for clearing
   browser.storage.sync
@@ -42,7 +55,7 @@ function saveOptions(e) {
     .then(() => {
       showStatus("Options saved!", "ait-text-green-600");
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       showStatus("Error saving options: " + error, "ait-text-red-600");
     })
     .finally(() => {
@@ -50,27 +63,35 @@ function saveOptions(e) {
     });
 }
 
-function restoreOptions() {
-  const apiKeyInput = document.getElementById("api-key");
+function restoreOptions(): void {
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
   const clearButton = document.getElementById("clear-key");
+
+  if (!apiKeyInput || !clearButton) {
+    return;
+  }
 
   browser.storage.sync
     .get("geminiApiKey")
-    .then((res) => {
+    .then((res: StorageData) => {
       if (res.geminiApiKey) {
         apiKeyInput.value = res.geminiApiKey;
         clearButton.classList.remove("ait-hidden");
       }
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       console.error("Error loading options: " + error);
     });
 }
 
-function toggleApiKeyVisibility() {
-  const apiKeyInput = document.getElementById("api-key");
+function toggleApiKeyVisibility(): void {
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
   const showKeyButton = document.getElementById("show-key");
-  const eyeIcon = showKeyButton.querySelector("svg");
+  const eyeIcon = showKeyButton?.querySelector("svg");
+
+  if (!apiKeyInput || !eyeIcon) {
+    return;
+  }
 
   if (apiKeyInput.type === "password") {
     apiKeyInput.type = "text";
@@ -86,16 +107,25 @@ function toggleApiKeyVisibility() {
   }
 }
 
-function clearApiKey() {
-  const apiKeyInput = document.getElementById("api-key");
+function clearApiKey(): void {
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
   const clearButton = document.getElementById("clear-key");
+
+  if (!apiKeyInput || !clearButton) {
+    return;
+  }
+
   apiKeyInput.value = "";
   clearButton.classList.add("ait-hidden");
 }
 
-function toggleClearButton() {
-  const apiKeyInput = document.getElementById("api-key");
+function toggleClearButton(): void {
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
   const clearButton = document.getElementById("clear-key");
+
+  if (!apiKeyInput || !clearButton) {
+    return;
+  }
 
   if (apiKeyInput.value.trim()) {
     clearButton.classList.remove("ait-hidden");
@@ -104,8 +134,12 @@ function toggleClearButton() {
   }
 }
 
-function showStatus(message, colorClass) {
+function showStatus(message: string, colorClass: string): void {
   const status = document.getElementById("status");
+  if (!status) {
+    return;
+  }
+
   status.textContent = message;
   status.className = `ait-text-sm ${colorClass}`;
   setTimeout(() => {
@@ -114,14 +148,19 @@ function showStatus(message, colorClass) {
   }, 3000);
 }
 
-async function testApiKey() {
-  const apiKey = document.getElementById("api-key").value.trim();
+async function testApiKey(): Promise<void> {
+  const apiKeyInput = document.getElementById("api-key") as HTMLInputElement;
+  if (!apiKeyInput) {
+    return;
+  }
+
+  const apiKey = apiKeyInput.value.trim();
   if (!apiKey) {
     showStatus("Please enter an API key first", "ait-text-red-600");
     return;
   }
 
-  setFormDisabled(true, 'test');
+  setFormDisabled(true, "test");
   const modelId = "gemini-2.0-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
 
@@ -131,34 +170,38 @@ async function testApiKey() {
         role: "user",
         parts: [
           {
-            text: "Test"
-          }
-        ]
-      }
+            text: "Test",
+          },
+        ],
+      },
     ],
     generationConfig: {
       temperature: 0.7,
-      responseMimeType: "text/plain"
-    }
+      responseMimeType: "text/plain",
+    },
   };
 
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as GeminiApiError;
       throw new Error(errorData.error?.message || response.statusText);
     }
 
     showStatus("API key is valid!", "ait-text-green-600");
   } catch (error) {
-    showStatus(error.message, "ait-text-red-600");
+    if (error instanceof Error) {
+      showStatus(error.message, "ait-text-red-600");
+    } else {
+      showStatus("An unknown error occurred", "ait-text-red-600");
+    }
   } finally {
     setFormDisabled(false);
   }
@@ -167,16 +210,32 @@ async function testApiKey() {
 document.addEventListener("DOMContentLoaded", () => {
   restoreOptions();
 
-  // Add event listeners
-  document.getElementById("api-key").addEventListener("input", toggleClearButton);
-  document.getElementById("save").addEventListener("click", saveOptions);
-  document.getElementById("show-key").addEventListener("click", toggleApiKeyVisibility);
-  document.getElementById("clear-key").addEventListener("click", clearApiKey);
-  document.getElementById("test-key").addEventListener("click", testApiKey);
+  const apiKeyInput = document.getElementById("api-key");
+  const saveButton = document.getElementById("save");
+  const showKeyButton = document.getElementById("show-key");
+  const clearKeyButton = document.getElementById("clear-key");
+  const testKeyButton = document.getElementById("test-key");
+  const form = document.querySelector("form");
 
-  // Prevent form submission
-  document.querySelector("form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    saveOptions(e);
-  });
+  if (apiKeyInput) {
+    apiKeyInput.addEventListener("input", toggleClearButton);
+  }
+  if (saveButton) {
+    saveButton.addEventListener("click", saveOptions);
+  }
+  if (showKeyButton) {
+    showKeyButton.addEventListener("click", toggleApiKeyVisibility);
+  }
+  if (clearKeyButton) {
+    clearKeyButton.addEventListener("click", clearApiKey);
+  }
+  if (testKeyButton) {
+    testKeyButton.addEventListener("click", testApiKey);
+  }
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      saveOptions(e);
+    });
+  }
 });
