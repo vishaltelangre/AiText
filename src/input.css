@@ -1,12 +1,140 @@
+/* Import Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@keyframes spinner {
+/*
+ * Scoped Tailwind Preflight
+ * https://github.com/tailwindlabs/tailwindcss/blob/6a0a3ec0fab2cc5fae36729da6b8a2894050eafd/packages/tailwindcss/preflight.css
+ */
+.ait-root *,
+.ait-root ::before,
+.ait-root ::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+
+.ait-root {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-family: var(
+    --default-font-family,
+    ui-sans-serif,
+    system-ui,
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji"
+  );
+  font-feature-settings: var(--default-font-feature-settings, normal);
+  font-variation-settings: var(--default-font-variation-settings, normal);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+  Use the modern Firefox focus style for all focusable elements.
+*/
+
+.ait-root :-moz-focusring {
+  outline: auto;
+}
+
+.ait-root small {
+  font-size: 80%;
+}
+
+/* Reset headings */
+.ait-root h1,
+.ait-root h2,
+.ait-root h3,
+.ait-root h4,
+.ait-root h5,
+.ait-root h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* Reset lists */
+.ait-root ol,
+.ait-root ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Reset links */
+.ait-root a {
+  color: inherit;
+  --webkit-text-decoration: inherit;
+  text-decoration: inherit;
+}
+
+/* Form elements */
+.ait-root button,
+.ait-root input,
+.ait-root optgroup,
+.ait-root select,
+.ait-root textarea {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+  opacity: 1;
+}
+
+/*
+  Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+*/
+
+.ait-root ::placeholder {
+  opacity: 1;
+}
+
+.ait-root :-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/* Custom variables */
+.ait-root {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+}
+
+/* Custom components */
+@layer components {
+  .ait-text-spinner {
+    animation: ait-spinner 1s linear infinite;
+  }
+}
+
+/* Animations */
+@keyframes ait-spinner {
   0% {
     transform: rotate(0deg);
   }
   100% {
     transform: rotate(360deg);
   }
+}
+
+@keyframes ait-fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ait-modal-animate {
+  animation: ait-fadeIn 0.2s ease-out;
 }

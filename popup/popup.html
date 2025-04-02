@@ -1,113 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AiText</title>
     <link rel="stylesheet" href="../dist/output.css" />
   </head>
-  <body class="ait-text-gray-800 ait-bg-white">
-    <div class="ait-w-[400px] ait-p-6">
-      <div class="ait-flex ait-justify-between ait-items-start ait-mb-4">
-        <div class="ait-flex ait-items-start ait-gap-3">
-          <img
-            src="../icons/icon-48.png"
-            alt="AiText"
-            class="ait-w-10 ait-h-10"
-          />
-          <div class="ait-flex ait-flex-col ait-justify-center">
-            <h1 class="ait-text-2xl ait-font-bold ait-text-gray-900">AiText</h1>
-            <p class="ait-text-sm ait-text-gray-500 ait-mt-0.5">
-              Enhance text with AI-powered writing improvements
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="ait-bg-gray-50 ait-rounded-xl ait-p-6 ait-mb-4">
-        <p class="ait-text-base ait-text-gray-600 ait-leading-relaxed ait-mb-4">
-          Select text on any webpage, right-click, and choose an enhancement
-          option from the "AiText" menu:
-        </p>
-
-        <div
-          class="ait-grid ait-grid-cols-2 ait-gap-1 ait-text-sm ait-text-gray-500"
-        >
-          <div class="ait-px-3 ait-py-1">• Fix Grammar</div>
-          <div class="ait-px-3 ait-py-1">• Rephrase</div>
-          <div class="ait-px-3 ait-py-1">• Formalize</div>
-          <div class="ait-px-3 ait-py-1">• Simplify</div>
-          <div class="ait-px-3 ait-py-1">• Summarize</div>
-          <div class="ait-px-3 ait-py-1">• And more...</div>
-        </div>
-      </div>
-
-      <div
-        id="api-status-container"
-        class="ait-flex ait-items-center ait-justify-between ait-bg-red-100/50 ait-border ait-border-red-200 ait-rounded-lg ait-px-4 ait-py-2.5 ait-mt-4"
-      >
-        <div class="ait-flex ait-items-center ait-gap-2">
-          <!-- Success checkmark icon -->
-          <svg
-            id="status-icon-success"
-            class="ait-hidden ait-w-4 ait-h-4 ait-text-green-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-          <!-- Error X icon -->
-          <svg
-            id="status-icon-error"
-            class="ait-w-4 ait-h-4 ait-text-red-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          <span id="api-status-text" class="ait-text-sm ait-text-red-700"
-            >API key not set</span
-          >
-        </div>
-        <button
-          id="options-button"
-          class="ait-inline-flex ait-items-center ait-px-3 ait-py-1.5 ait-text-sm ait-font-medium ait-text-gray-700 ait-bg-white ait-border ait-border-gray-200 ait-rounded-md ait-transition-all ait-shadow-sm ait-gap-1.5 hover:ait-bg-gray-50 hover:ait-border-gray-300 active:ait-bg-gray-100"
-        >
-          <svg
-            class="ait-w-4 ait-h-4 ait-text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          Settings
-        </button>
-      </div>
-    </div>
-
+  <body>
+    <div id="root"></div>
     <script src="../dist/popup.js"></script>
   </body>
 </html>

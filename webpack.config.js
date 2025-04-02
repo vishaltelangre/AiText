@@ -1,31 +1,45 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  mode: 'development',
+  mode: "development",
+  devtool: "source-map",
   entry: {
-    background: './background.ts',
-    content: './content.ts',
-    popup: './popup/popup.ts',
-    options: './options/options.ts'
+    background: "./background.ts",
+    content: "./content.ts",
+    popup: "./popup/popup.tsx",
+    options: "./options/options.tsx",
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              transpileOnly: true,
+              compilerOptions: {
+                jsx: "react-jsx",
+              },
+            },
+          },
+        ],
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
-      '@': path.resolve(__dirname),
+      "@": path.resolve(__dirname, "src"),
     },
   },
-  devtool: 'source-map',
 };
