@@ -94,6 +94,10 @@
   opacity: 1;
 }
 
+.ait-root button {
+  cursor: pointer;
+}
+
 /*
   Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
 */

@@ -75,8 +75,9 @@ const ModalLayout = ({ title, onClose, children, footer }: ModalLayoutProps) => 
           <div className="ait-text-lg ait-font-semibold ait-text-gray-800">{title}</div>
         </div>
         <button
-          className="ait-rounded-lg ait-p-1 ait-text-gray-400 ait-transition-colors hover:ait-bg-gray-100 hover:ait-text-gray-600"
+          className="ait-rounded-lg ait-p-1 ait-text-gray-400 ait-transition-colors hover:ait-text-gray-600"
           onClick={onClose}
+          title="Close"
         >
           <CrossIcon />
         </button>
