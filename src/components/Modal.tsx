@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { type EnhancementType, ACTIONS, MODAL_EVENT_NAME } from "@/constants";
 import { CrossIcon, LoadingSpinnerIcon, PencilIcon, SparklesIcon } from "@/components/Icons";
 import { MessageSchema } from "@/schemas";
+import { dispatchModalEvent } from "@/utils";
 
 type ModalState =
   | { type: "closed" }
@@ -220,13 +221,7 @@ export const Modal = () => {
     };
   }, []);
 
-  const handleClose = () => {
-    window.dispatchEvent(
-      new CustomEvent(MODAL_EVENT_NAME, {
-        detail: { action: ACTIONS.MODAL_CLOSE },
-      })
-    );
-  };
+  const handleClose = () => dispatchModalEvent({ action: ACTIONS.MODAL_CLOSE });
 
   if (state.type === "closed") return null;
 

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { Modal } from "@/components/Modal";
 import { Message, MessageSchema } from "@/schemas";
 import { MODAL_EVENT_NAME, ACTIONS } from "@/constants";
+import { sendRuntimeMessage, dispatchModalEvent } from "@/utils";
 
 let selectedRange: Range | null = null;
 
@@ -44,60 +45,52 @@ function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.EN
     selectedRange = selection.getRangeAt(0);
   }
 
-  window.dispatchEvent(
-    new CustomEvent(MODAL_EVENT_NAME, {
-      detail: {
-        action: ACTIONS.MODAL_SHOW_LOADING,
-        enhancementType: message.enhancementType,
-      } as Message,
-    })
-  );
+  dispatchModalEvent({
+    action: ACTIONS.MODAL_SHOW_LOADING,
+    enhancementType: message.enhancementType,
+  });
 
-  browser.runtime.sendMessage({
+  toggleBodyScroll(true);
+
+  sendRuntimeMessage({
     action: ACTIONS.CALL_AI_API,
     text: message.text,
     instruction: message.instruction,
     enhancementType: message.enhancementType,
-  } as Message);
+  });
 }
 
 function handleReplaceTextMessage(message: Message & { action: typeof ACTIONS.REPLACE_TEXT }) {
   const parentElement = selectedRange?.startContainer.parentElement;
-  window.dispatchEvent(
-    new CustomEvent(MODAL_EVENT_NAME, {
-      detail: {
-        action: ACTIONS.MODAL_SHOW_RESULT,
-        enhancementType: message.enhancementType,
-        originalText: message.originalText,
-        enhancedText: message.result,
-        onReplace:
-          parentElement && isEditableElement(parentElement)
-            ? () => {
-                if (selectedRange) {
-                  selectedRange.deleteContents();
-                  selectedRange.insertNode(document.createTextNode(message.result));
-                }
-              }
-            : undefined,
-      } as Message,
-    })
-  );
+  dispatchModalEvent({
+    action: ACTIONS.MODAL_SHOW_RESULT,
+    enhancementType: message.enhancementType,
+    originalText: message.originalText,
+    enhancedText: message.result,
+    onReplace:
+      parentElement && isEditableElement(parentElement)
+        ? () => {
+            if (selectedRange) {
+              selectedRange.deleteContents();
+              selectedRange.insertNode(document.createTextNode(message.result));
+            }
+          }
+        : undefined,
+  });
 }
 
 function handleShowErrorMessage(message: Message & { action: typeof ACTIONS.SHOW_ERROR }) {
-  window.dispatchEvent(
-    new CustomEvent(MODAL_EVENT_NAME, {
-      detail: {
-        action: ACTIONS.MODAL_SHOW_ERROR,
-        error: message.error || "An error occurred",
-      } as Message,
-    })
-  );
+  dispatchModalEvent({
+    action: ACTIONS.MODAL_SHOW_ERROR,
+    error: message.error || "An error occurred",
+  });
 }
 
 function handleModalClose(message: Message & { action: typeof ACTIONS.MODAL_CLOSE }) {
   toggleBodyScroll(false);
 }
+
+ensureModalRootExists();
 
 // Handle messages emitted by the background script
 browser.runtime.onMessage.addListener(async (message: unknown) => {
@@ -128,5 +121,3 @@ window.addEventListener(MODAL_EVENT_NAME, ((event: CustomEvent) => {
     handleModalClose(data);
   }
 }) as EventListener);
-
-document.addEventListener("DOMContentLoaded", ensureModalRootExists);

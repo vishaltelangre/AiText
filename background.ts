@@ -1,6 +1,7 @@
 import { type Message, MessageSchema } from "@/schemas";
 import { callAiApi } from "@/data";
 import { ACTIONS } from "@/constants";
+import { sendContentMessageToTab } from "@/utils";
 
 const menuItems = [
   {
@@ -58,12 +59,12 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 
     if (menuItem) {
       // Send message to content script with the selected text and instruction
-      browser.tabs.sendMessage(tab.id, {
+      sendContentMessageToTab(tab.id, {
         action: ACTIONS.ENHANCE_TEXT,
         text: info.selectionText,
         instruction: menuItem.instruction,
         enhancementType: menuItem.id,
-      } as Message);
+      });
     }
   }
 });
@@ -88,20 +89,20 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
         const promise = callAiApi(data.text, data.instruction, abortController.signal);
         promise
           .then((result) => {
-            browser.tabs.sendMessage(tabId, {
+            sendContentMessageToTab(tabId, {
               action: ACTIONS.REPLACE_TEXT,
               result,
               originalText: data.text,
               enhancementType: data.enhancementType,
-            } as Message);
+            });
           })
           .catch((error) => {
             if (error instanceof DOMException && error.name === "AbortError") return;
 
-            browser.tabs.sendMessage(tabId, {
+            sendContentMessageToTab(tabId, {
               action: ACTIONS.MODAL_SHOW_ERROR,
               error: error.message,
-            } as Message);
+            });
           });
       }, 300);
     }
