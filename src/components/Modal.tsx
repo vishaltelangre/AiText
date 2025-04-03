@@ -13,7 +13,7 @@ type ModalState =
       enhancementType: EnhancementType;
       originalText: string;
       enhancedText: string;
-      onApply?: () => void;
+      onReplace?: () => void;
     }
   | {
       type: "error";
@@ -67,7 +67,7 @@ export const Modal = () => {
             enhancementType: data.enhancementType,
             originalText: data.originalText,
             enhancedText: data.enhancedText,
-            onApply: data.onApply,
+            onReplace: data.onReplace,
           });
           break;
         case `${ACTION_NAME_PREFIX}-modal-showError`:
@@ -224,19 +224,13 @@ export const Modal = () => {
                 </div>
               </div>
             </div>
-            {state.onApply ? (
+            {state.onReplace ? (
               <div className="ait-flex ait-shrink-0 ait-justify-end ait-gap-3 ait-border-t ait-border-gray-200 ait-bg-gray-50 ait-px-6 ait-py-4">
                 <button
-                  className="ait-rounded-lg ait-border ait-border-gray-200 ait-bg-white ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-gray-700 ait-transition-colors hover:ait-border-gray-300 hover:ait-bg-gray-50 focus:ait-ring-2 focus:ait-ring-gray-200"
-                  onClick={handleClose}
-                >
-                  Cancel
-                </button>
-                <button
                   className="focus:ait-ring-primary/50 ait-rounded-lg ait-bg-primary ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-white ait-transition-colors hover:ait-bg-primary-hover focus:ait-ring-2 focus:ait-ring-offset-2"
-                  onClick={state.onApply}
+                  onClick={state.onReplace}
                 >
-                  Apply Changes
+                  Replace
                 </button>
               </div>
             ) : null}

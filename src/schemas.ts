@@ -53,7 +53,7 @@ export const MessageSchema = z.discriminatedUnion("action", [
     enhancementType: EnhancementTypeSchema,
     originalText: z.string(),
     enhancedText: z.string(),
-    onApply: z.function().optional(),
+    onReplace: z.function().optional(),
   }),
   z.object({
     action: z.literal(`${ACTION_NAME_PREFIX}-modal-close`),

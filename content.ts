@@ -50,7 +50,8 @@ browser.runtime.onMessage.addListener((message: unknown) => {
       validatedMessage.action === `${ACTION_NAME_PREFIX}-enhanceText` &&
       validatedMessage.text.trim() !== ""
     ) {
-      selectedRange = window.getSelection()?.getRangeAt(0) || null;
+      const selection = window.getSelection();
+      selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
       toggleBodyScroll(true);
 
       // Dispatch loading event
@@ -79,14 +80,15 @@ browser.runtime.onMessage.addListener((message: unknown) => {
             enhancementType: validatedMessage.enhancementType,
             originalText: validatedMessage.originalText,
             enhancedText: validatedMessage.result,
-            onApply: isEditableElement(parentElement ? parentElement : null)
-              ? () => {
-                  if (selectedRange) {
-                    selectedRange.deleteContents();
-                    selectedRange.insertNode(document.createTextNode(validatedMessage.result));
+            onReplace:
+              parentElement && isEditableElement(parentElement)
+                ? () => {
+                    if (selectedRange) {
+                      selectedRange.deleteContents();
+                      selectedRange.insertNode(document.createTextNode(validatedMessage.result));
+                    }
                   }
-                }
-              : undefined,
+                : undefined,
           } as Message,
         })
       );
