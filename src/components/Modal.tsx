@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ACTION_NAME_PREFIX, type EnhancementType } from "@/schemas";
+import { LoadingSpinnerIcon } from "@/components/Icons";
 
 type ModalState =
   | { type: "closed" }
@@ -87,7 +88,12 @@ export const Modal = () => {
     };
   }, []);
 
-  const handleClose = () => setState({ type: "closed" });
+  const handleClose = () =>
+    window.dispatchEvent(
+      new CustomEvent("ait-modal-event", {
+        detail: { action: `${ACTION_NAME_PREFIX}-modal-close` },
+      })
+    );
 
   if (state.type === "closed") return null;
 
@@ -126,8 +132,7 @@ export const Modal = () => {
               </button>
             </div>
             <div className="ait-flex ait-flex-col ait-items-center ait-p-12">
-              <div className="ait-text-spinner ait-mb-6 ait-h-10 ait-w-10 ait-rounded-full ait-border-4 ait-border-gray-200 ait-border-t-primary"></div>
-              <div className="ait-font-medium ait-text-gray-600">{loading}</div>
+              <LoadingSpinnerIcon className="ait-h-8 ait-w-8" />
               <div className="ait-mt-2 ait-text-sm ait-text-gray-400">
                 This might take a few seconds...
               </div>

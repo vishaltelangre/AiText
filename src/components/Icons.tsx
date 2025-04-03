@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export const CheckIcon = () => (
   <svg className="ait-h-5 ait-w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -62,9 +64,9 @@ export const VisibilityEyeIcon = ({ open }: { open: boolean }) => (
   </svg>
 );
 
-export const LoadingSpinnerIcon = () => (
+export const LoadingSpinnerIcon = ({ className = "ait-h-4 ait-w-4" }: { className?: string }) => (
   <svg
-    className="ait-h-4 ait-w-4 ait-animate-spin"
+    className={clsx("ait-animate-spin", className)}
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

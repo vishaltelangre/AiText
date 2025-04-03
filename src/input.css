@@ -107,23 +107,7 @@
   --primary-hover: #2563eb;
 }
 
-/* Custom components */
-@layer components {
-  .ait-text-spinner {
-    animation: ait-spinner 1s linear infinite;
-  }
-}
-
 /* Animations */
-@keyframes ait-spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes ait-fadeIn {
   from {
     opacity: 0;
@@ -137,4 +121,9 @@
 
 .ait-modal-animate {
   animation: ait-fadeIn 0.2s ease-out;
+}
+
+/* Prevent body scroll when modal is open */
+body.ait-modal-open {
+  overflow: hidden !important;
 }

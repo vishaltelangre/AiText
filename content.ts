@@ -1,37 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Modal } from "@/components/Modal";
-import { ACTION_NAME_PREFIX, Message, MessageSchema, type EnhancementType } from "@/schemas";
-
-// Define spinner animation styles
-const styles = `
-@keyframes spinner {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.ait-text-spinner {
-  animation: spinner 1s linear infinite;
-}
-
-/* Fade in animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.ait-modal-animate {
-  animation: fadeIn 0.2s ease-out;
-}
-
-/* Prevent body scroll when modal is open */
-body.ait-modal-open {
-  overflow: hidden !important;
-}`;
-
-const styleEl = document.createElement("style");
-styleEl.textContent = styles;
-document.head.appendChild(styleEl);
+import { ACTION_NAME_PREFIX, Message, MessageSchema } from "@/schemas";
 
 let selectedRange: Range | null = null;
 
@@ -48,6 +18,7 @@ function ensureModalRootExists(): HTMLElement {
   if (!modalRoot) {
     const newModalRoot = document.createElement("div");
     newModalRoot.id = "ait-root";
+    newModalRoot.classList.add("ait-root");
     document.body.appendChild(newModalRoot);
     ReactDOM.createRoot(newModalRoot).render(React.createElement(Modal));
     return newModalRoot;
