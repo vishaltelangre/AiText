@@ -1,11 +1,5 @@
-import {
-  type Message,
-  ACTION_NAME_PREFIX,
-  MessageSchema,
-  GeminiApiErrorSchema,
-  GeminiApiResponseSchema,
-  EnhancementType,
-} from "@/schemas";
+import { type Message, ACTION_NAME_PREFIX, MessageSchema } from "@/schemas";
+import { callAiApi } from "@/data";
 
 const menuItems = [
   {
@@ -63,13 +57,12 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 
     if (menuItem) {
       // Send message to content script with the selected text and instruction
-      const message: Message = {
+      browser.tabs.sendMessage(tab.id, {
         action: `${ACTION_NAME_PREFIX}-enhanceText`,
         text: info.selectionText,
         instruction: menuItem.instruction,
         enhancementType: menuItem.id,
-      };
-      browser.tabs.sendMessage(tab.id, message);
+      } as Message);
     }
   }
 });
@@ -86,12 +79,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
     const validatedMessage = data;
 
     if (validatedMessage.action === `${ACTION_NAME_PREFIX}-callAiApi` && sender.tab?.id) {
-      // Clear any existing debounce timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-      }
-
-      // Set a new debounce timeout
+      if (debounceTimeout) clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
         abortController?.abort();
         abortController = new AbortController();
@@ -113,63 +101,17 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
             } as Message);
           })
           .catch((error) => {
-            if (error.name === "AbortError") {
-              // Ignore abort errors
-              return;
-            }
+            if (error instanceof DOMException && error.name === "AbortError") return;
+
             browser.tabs.sendMessage(tabId, {
               action: `${ACTION_NAME_PREFIX}-modal-showError`,
               error: error.message,
             });
           });
-      }, 300); // 300ms debounce
+      }, 300);
     }
   } catch (error) {
     console.error("Invalid message received:", error);
   }
   return true;
 });
-
-function callAiApi(text: string, instruction: string, signal?: AbortSignal): Promise<string> {
-  return callGeminiApi(text, instruction, undefined, signal);
-}
-
-export async function callGeminiApi(
-  text: string,
-  instruction: string,
-  apiKey?: string,
-  signal?: AbortSignal
-): Promise<string> {
-  if (!apiKey) {
-    const data = await browser.storage.sync.get("geminiApiKey");
-    apiKey = data.geminiApiKey;
-  }
-
-  if (!apiKey) throw new Error("API key not set");
-
-  const modelId = "gemini-2.0-flash-lite";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
-
-  const requestBody = {
-    contents: [{ role: "user", parts: [{ text }] }],
-    systemInstruction: { parts: [{ text: instruction }] },
-    generationConfig: { temperature: 0.7, responseMimeType: "text/plain" },
-  };
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody),
-    signal,
-  });
-
-  if (!response.ok) {
-    const { success, data, error } = GeminiApiErrorSchema.safeParse(await response.json());
-    if (!success) throw new Error(`API Error: ${error.message}`);
-    throw new Error(`API Error: ${data.error?.message || response.statusText}`);
-  }
-
-  const { success, data, error } = GeminiApiResponseSchema.safeParse(await response.json());
-  if (!success) throw new Error(`API Error: ${error.message}`);
-  return data.candidates[0].content.parts[0].text;
-}

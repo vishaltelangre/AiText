@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import ReactDOM from "react-dom/client";
 import { StorageDataSchema } from "@/schemas";
 import { CrossIcon, LoadingSpinnerIcon, VisibilityEyeIcon } from "@/components/Icons";
-import { callGeminiApi } from "../background";
+import { callGeminiApi } from "@/data";
 
 type AlertType = "success" | "error";
 type LoadingType = "save-settings" | "test-api-key";
