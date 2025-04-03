@@ -90,7 +90,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
         promise
           .then((result) => {
             sendContentMessageToTab(tabId, {
-              action: ACTIONS.REPLACE_TEXT,
+              action: ACTIONS.SHOW_ENHANCED_TEXT,
               result,
               originalText: data.text,
               enhancementType: data.enhancementType,

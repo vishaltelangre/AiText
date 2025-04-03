@@ -23,7 +23,7 @@ export const MessageSchema = z.discriminatedUnion("action", [
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.REPLACE_TEXT),
+    action: z.literal(ACTIONS.SHOW_ENHANCED_TEXT),
     originalText: z.string(),
     result: z.string(),
     enhancementType: EnhancementTypeSchema,
@@ -41,7 +41,7 @@ export const MessageSchema = z.discriminatedUnion("action", [
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.MODAL_SHOW_RESULT),
+    action: z.literal(ACTIONS.MODAL_SHOW_ENHANCED_TEXT),
     enhancementType: EnhancementTypeSchema,
     originalText: z.string(),
     enhancedText: z.string(),

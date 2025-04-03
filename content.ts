@@ -60,10 +60,12 @@ function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.EN
   });
 }
 
-function handleReplaceTextMessage(message: Message & { action: typeof ACTIONS.REPLACE_TEXT }) {
+function handleShowEnhancedTextMessage(
+  message: Message & { action: typeof ACTIONS.SHOW_ENHANCED_TEXT }
+) {
   const parentElement = selectedRange?.startContainer.parentElement;
   dispatchModalEvent({
-    action: ACTIONS.MODAL_SHOW_RESULT,
+    action: ACTIONS.MODAL_SHOW_ENHANCED_TEXT,
     enhancementType: message.enhancementType,
     originalText: message.originalText,
     enhancedText: message.result,
@@ -102,8 +104,8 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
 
     if (data.action === ACTIONS.ENHANCE_TEXT) {
       handleEnhanceTextMessage(data);
-    } else if (data.action === ACTIONS.REPLACE_TEXT) {
-      handleReplaceTextMessage(data);
+    } else if (data.action === ACTIONS.SHOW_ENHANCED_TEXT) {
+      handleShowEnhancedTextMessage(data);
     } else if (data.action === ACTIONS.SHOW_ERROR) {
       handleShowErrorMessage(data);
     }

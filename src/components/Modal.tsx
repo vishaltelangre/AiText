@@ -197,7 +197,7 @@ export const Modal = () => {
           type: "loading",
           enhancementType: data.enhancementType,
         });
-      } else if (data.action === ACTIONS.MODAL_SHOW_RESULT) {
+      } else if (data.action === ACTIONS.MODAL_SHOW_ENHANCED_TEXT) {
         setState({
           type: "result",
           enhancementType: data.enhancementType,
