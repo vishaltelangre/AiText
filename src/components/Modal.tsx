@@ -6,9 +6,11 @@ import {
   PencilIcon,
   SparklesIcon,
   ClipboardIcon,
+  SettingsIcon,
 } from "@/components/Icons";
 import { MessageSchema } from "@/schemas";
 import { dispatchModalEvent } from "@/utils";
+import { Button } from "@/components/Button";
 
 type ModalState =
   | { type: "closed" }
@@ -74,13 +76,9 @@ const ModalLayout = ({ title, onClose, children, footer }: ModalLayoutProps) => 
           />
           <div className="ait-text-lg ait-font-semibold ait-text-gray-800">{title}</div>
         </div>
-        <button
-          className="ait-rounded-lg ait-p-1 ait-text-gray-400 ait-transition-colors hover:ait-text-gray-600"
-          onClick={onClose}
-          title="Close"
-        >
+        <Button variant="icon" onClick={onClose} title="Close">
           <CrossIcon />
-        </button>
+        </Button>
       </div>
       <div className="ait-flex ait-min-h-0 ait-flex-1 ait-flex-col ait-overflow-hidden ait-bg-white">
         {children}
@@ -125,13 +123,9 @@ const CopyToClipboard = ({ text }: { text: string }) => {
   return (
     <div className="ait-flex ait-items-center ait-gap-2">
       {showCopied && <span className="ait-text-sm ait-text-gray-500">Copied!</span>}
-      <button
-        onClick={() => void handleCopy()}
-        className="ait-rounded ait-p-1 ait-text-gray-400 hover:ait-bg-gray-100 hover:ait-text-gray-600"
-        title="Copy to clipboard"
-      >
+      <Button variant="icon" onClick={() => void handleCopy()} title="Copy to clipboard">
         <ClipboardIcon />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -159,12 +153,9 @@ const ResultModal = ({
       onClose={onClose}
       footer={
         onReplace ? (
-          <button
-            className="focus:ait-ring-primary/50 ait-rounded-lg ait-bg-primary ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-white ait-transition-colors hover:ait-bg-primary-hover focus:ait-ring-2 focus:ait-ring-offset-2"
-            onClick={onReplace}
-          >
+          <Button variant="primary" onClick={onReplace}>
             Replace
-          </button>
+          </Button>
         ) : undefined
       }
     >
@@ -216,12 +207,13 @@ const ErrorModal = ({ errorMessage, onClose }: ErrorModalProps) => {
       title="Error"
       onClose={onClose}
       footer={
-        <button
-          className="focus:ait-ring-primary/50 ait-rounded-lg ait-bg-gray-100 ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-gray-700 ait-transition-colors hover:ait-bg-gray-200 focus:ait-ring-2 focus:ait-ring-offset-2"
+        <Button
+          variant="secondary"
           onClick={() => dispatchModalEvent({ action: ACTIONS.OPEN_SETTINGS_PAGE })}
         >
+          <SettingsIcon />
           Check settings
-        </button>
+        </Button>
       }
     >
       <div className="ait-flex ait-flex-col ait-p-6">

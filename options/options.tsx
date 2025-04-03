@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import { StorageDataSchema } from "@/schemas";
 import { CrossIcon, LoadingSpinnerIcon, VisibilityEyeIcon } from "@/components/Icons";
 import { callGeminiApi } from "@/data";
+import Button from "@/components/Button";
 
 type AlertType = "success" | "error";
 type LoadingType = "save-settings" | "test-api-key";
@@ -104,26 +105,23 @@ const Options = () => {
                     className="ait-block ait-w-full ait-rounded-md ait-border ait-border-gray-300 ait-px-3 ait-py-2 ait-text-sm ait-placeholder-gray-400 ait-shadow-sm focus:ait-border-primary focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary disabled:ait-cursor-not-allowed disabled:ait-bg-gray-50 disabled:ait-text-gray-500"
                     disabled={isLoading !== null}
                   />
-                  <div className="ait-absolute ait-right-0 ait-top-0 ait-flex ait-h-full ait-items-center ait-gap-0.5 ait-pr-1">
-                    <button
-                      type="button"
+                  <div className="ait-absolute ait-right-1 ait-top-0 ait-flex ait-h-full ait-items-center">
+                    <Button
+                      variant="icon"
                       onClick={() => setShowKey(!showKey)}
                       title={showKey ? "Hide API key" : "Show API key"}
-                      className="ait-inline-flex ait-items-center ait-rounded ait-p-1.5 ait-text-gray-400 ait-transition-colors hover:ait-text-[#000000] disabled:ait-cursor-not-allowed disabled:ait-opacity-50 disabled:hover:ait-text-gray-400"
-                      disabled={isLoading !== null}
                     >
                       <VisibilityEyeIcon open={showKey} />
-                    </button>
+                    </Button>
                     {apiKey.length > 0 ? (
-                      <button
-                        type="button"
+                      <Button
+                        variant="icon"
                         onClick={() => setApiKey("")}
-                        title="Clear API key"
-                        className="ait-inline-flex ait-items-center ait-rounded ait-p-1.5 ait-text-gray-400 ait-transition-colors hover:ait-text-[#000000] disabled:ait-cursor-not-allowed disabled:ait-opacity-50 disabled:hover:ait-text-gray-400"
                         disabled={isLoading !== null}
+                        title="Clear API key"
                       >
                         <CrossIcon />
-                      </button>
+                      </Button>
                     ) : null}
                   </div>
                 </div>
@@ -154,23 +152,22 @@ const Options = () => {
                 {alert?.message}
               </div>
               <div className="ait-flex ait-gap-3">
-                <button
-                  type="submit"
-                  className="ait-flex ait-flex-1 ait-items-center ait-justify-center ait-gap-2 ait-rounded-md ait-bg-primary ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-white hover:ait-bg-primary-hover disabled:ait-cursor-not-allowed disabled:ait-opacity-50"
-                  disabled={isLoading !== null}
-                >
-                  <span>Save</span>
-                  {isLoading === "save-settings" ? <LoadingSpinnerIcon /> : null}
-                </button>
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={testApiKey}
-                  className="ait-flex ait-items-center ait-justify-center ait-gap-2 ait-rounded-md ait-bg-gray-100 ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-gray-700 hover:ait-bg-gray-200 disabled:ait-cursor-not-allowed disabled:ait-opacity-50"
                   disabled={isLoading !== null}
+                  loading={isLoading === "test-api-key"}
                 >
-                  <span>Test connectivity</span>
-                  {isLoading === "test-api-key" ? <LoadingSpinnerIcon /> : null}
-                </button>
+                  Test connectivity
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={isLoading !== null}
+                  loading={isLoading === "save-settings"}
+                  type="submit"
+                >
+                  Save
+                </Button>
               </div>
             </div>
           </div>

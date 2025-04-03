@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { clsx } from "clsx";
 import { StorageDataSchema } from "@/schemas";
 import { CheckIcon, CrossIcon, SettingsIcon } from "@/components/Icons";
+import Button from "@/components/Button";
 
 type ApiKeyStatus = {
   hasKey: boolean;
@@ -74,13 +75,14 @@ const Popup = () => {
               {apiKeyStatus.hasKey ? "API key is set" : apiKeyStatus.error || "API key is not set"}
             </span>
           </div>
-          <button
+
+          <Button
+            variant="icon"
+            title="Check settings"
             onClick={() => browser.runtime.openOptionsPage()}
-            title="Settings"
-            className="ait-rounded-lg ait-p-1 ait-text-gray-400 ait-transition-colors hover:ait-bg-gray-100 hover:ait-text-gray-600"
           >
             <SettingsIcon />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
