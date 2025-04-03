@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { type EnhancementType, ACTIONS, MODAL_EVENT_NAME } from "@/constants";
-import { CrossIcon, LoadingSpinnerIcon, PencilIcon, SparklesIcon } from "@/components/Icons";
+import {
+  CrossIcon,
+  LoadingSpinnerIcon,
+  PencilIcon,
+  SparklesIcon,
+  ClipboardIcon,
+} from "@/components/Icons";
 import { MessageSchema } from "@/schemas";
 import { dispatchModalEvent } from "@/utils";
 
@@ -106,6 +112,29 @@ const LoadingModal = ({ enhancementType, onClose }: LoadingModalProps) => {
   );
 };
 
+const CopyToClipboard = ({ text }: { text: string }) => {
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(text);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
+
+  return (
+    <div className="ait-flex ait-items-center ait-gap-2">
+      {showCopied && <span className="ait-text-sm ait-text-gray-500">Copied!</span>}
+      <button
+        onClick={() => void handleCopy()}
+        className="ait-rounded ait-p-1 ait-text-gray-400 hover:ait-bg-gray-100 hover:ait-text-gray-600"
+        title="Copy to clipboard"
+      >
+        <ClipboardIcon />
+      </button>
+    </div>
+  );
+};
+
 type ResultModalProps = {
   enhancementType: EnhancementType;
   originalText: string;
@@ -122,6 +151,7 @@ const ResultModal = ({
   onClose,
 }: ResultModalProps) => {
   const { action } = getActionTitle(enhancementType);
+
   return (
     <ModalLayout
       title={action}
@@ -139,9 +169,11 @@ const ResultModal = ({
     >
       <div className="ait-grid ait-min-h-0 ait-flex-1 ait-grid-cols-2 ait-divide-x ait-divide-gray-200">
         <div className="ait-flex ait-flex-col ait-overflow-hidden">
-          <div className="ait-flex ait-shrink-0 ait-items-center ait-gap-2 ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6 ait-py-3">
-            <PencilIcon />
-            <h3 className="ait-font-medium ait-text-gray-700">Original</h3>
+          <div className="ait-flex ait-h-12 ait-shrink-0 ait-items-center ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6">
+            <div className="ait-flex ait-flex-1 ait-items-center ait-gap-2">
+              <PencilIcon />
+              <h3 className="ait-font-medium ait-text-gray-700">Original</h3>
+            </div>
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
             <div className="ait-prose ait-prose-sm ait-mx-auto ait-max-w-[450px] ait-max-w-none ait-text-gray-600">
@@ -152,9 +184,12 @@ const ResultModal = ({
           </div>
         </div>
         <div className="ait-flex ait-flex-col ait-overflow-hidden">
-          <div className="ait-flex ait-shrink-0 ait-items-center ait-gap-2 ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6 ait-py-3">
-            <SparklesIcon />
-            <h3 className="ait-font-medium ait-text-gray-700">Updated</h3>
+          <div className="ait-flex ait-h-12 ait-shrink-0 ait-items-center ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6">
+            <div className="ait-flex ait-flex-1 ait-items-center ait-gap-2">
+              <SparklesIcon />
+              <h3 className="ait-font-medium ait-text-gray-700">Updated</h3>
+            </div>
+            <CopyToClipboard text={enhancedText} />
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
             <div className="ait-prose ait-prose-sm ait-mx-auto ait-max-w-[450px] ait-max-w-none ait-text-gray-800">
