@@ -1,5 +1,6 @@
-import { type Message, ACTION_NAME_PREFIX, MessageSchema } from "@/schemas";
+import { type Message, MessageSchema } from "@/schemas";
 import { callAiApi } from "@/data";
+import { ACTIONS } from "@/constants";
 
 const menuItems = [
   {
@@ -58,7 +59,7 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
     if (menuItem) {
       // Send message to content script with the selected text and instruction
       browser.tabs.sendMessage(tab.id, {
-        action: `${ACTION_NAME_PREFIX}-enhanceText`,
+        action: ACTIONS.ENHANCE_TEXT,
         text: info.selectionText,
         instruction: menuItem.instruction,
         enhancementType: menuItem.id,
@@ -76,9 +77,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
     const { success, data } = MessageSchema.safeParse(message);
     if (!success) throw new Error("Invalid message received");
 
-    const validatedMessage = data;
-
-    if (validatedMessage.action === `${ACTION_NAME_PREFIX}-callAiApi` && sender.tab?.id) {
+    if (data.action === ACTIONS.CALL_AI_API && sender.tab?.id) {
       if (debounceTimeout) clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
         abortController?.abort();
@@ -86,27 +85,23 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
         const tabId = sender.tab?.id;
         if (!tabId) return;
 
-        const promise = callAiApi(
-          validatedMessage.text,
-          validatedMessage.instruction,
-          abortController.signal
-        );
+        const promise = callAiApi(data.text, data.instruction, abortController.signal);
         promise
           .then((result) => {
             browser.tabs.sendMessage(tabId, {
-              action: `${ACTION_NAME_PREFIX}-replaceText`,
-              result: result,
-              originalText: validatedMessage.text,
-              enhancementType: validatedMessage.enhancementType,
+              action: ACTIONS.REPLACE_TEXT,
+              result,
+              originalText: data.text,
+              enhancementType: data.enhancementType,
             } as Message);
           })
           .catch((error) => {
             if (error instanceof DOMException && error.name === "AbortError") return;
 
             browser.tabs.sendMessage(tabId, {
-              action: `${ACTION_NAME_PREFIX}-modal-showError`,
+              action: ACTIONS.MODAL_SHOW_ERROR,
               error: error.message,
-            });
+            } as Message);
           });
       }, 300);
     }

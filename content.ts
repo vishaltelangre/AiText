@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Modal } from "@/components/Modal";
-import { ACTION_NAME_PREFIX, Message, MessageSchema } from "@/schemas";
+import { Message, MessageSchema } from "@/schemas";
+import { MODAL_EVENT_NAME, ACTIONS } from "@/constants";
 
 let selectedRange: Range | null = null;
 
@@ -27,91 +28,105 @@ function ensureModalRootExists(): HTMLElement {
   return modalRoot;
 }
 
-ensureModalRootExists();
-
-function isEditableElement(element: Element | null): boolean {
-  if (!element) return false;
-  const htmlElement = element as HTMLElement;
+function isEditableElement(element: Element): boolean {
   return (
-    htmlElement.isContentEditable || element.tagName === "INPUT" || element.tagName === "TEXTAREA"
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLTextAreaElement ||
+    element.hasAttribute("contenteditable")
   );
 }
 
-// Listen for messages from background script
-browser.runtime.onMessage.addListener((message: unknown) => {
+function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.ENHANCE_TEXT }) {
+  if (message.text.trim() === "") return;
+
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    selectedRange = selection.getRangeAt(0);
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(MODAL_EVENT_NAME, {
+      detail: {
+        action: ACTIONS.MODAL_SHOW_LOADING,
+        enhancementType: message.enhancementType,
+      } as Message,
+    })
+  );
+
+  browser.runtime.sendMessage({
+    action: ACTIONS.CALL_AI_API,
+    text: message.text,
+    instruction: message.instruction,
+    enhancementType: message.enhancementType,
+  } as Message);
+}
+
+function handleReplaceTextMessage(message: Message & { action: typeof ACTIONS.REPLACE_TEXT }) {
+  const parentElement = selectedRange?.startContainer.parentElement;
+  window.dispatchEvent(
+    new CustomEvent(MODAL_EVENT_NAME, {
+      detail: {
+        action: ACTIONS.MODAL_SHOW_RESULT,
+        enhancementType: message.enhancementType,
+        originalText: message.originalText,
+        enhancedText: message.result,
+        onReplace:
+          parentElement && isEditableElement(parentElement)
+            ? () => {
+                if (selectedRange) {
+                  selectedRange.deleteContents();
+                  selectedRange.insertNode(document.createTextNode(message.result));
+                }
+              }
+            : undefined,
+      } as Message,
+    })
+  );
+}
+
+function handleShowErrorMessage(message: Message & { action: typeof ACTIONS.SHOW_ERROR }) {
+  window.dispatchEvent(
+    new CustomEvent(MODAL_EVENT_NAME, {
+      detail: {
+        action: ACTIONS.MODAL_SHOW_ERROR,
+        error: message.error || "An error occurred",
+      } as Message,
+    })
+  );
+}
+
+function handleModalClose(message: Message & { action: typeof ACTIONS.MODAL_CLOSE }) {
+  toggleBodyScroll(false);
+}
+
+// Handle messages emitted by the background script
+browser.runtime.onMessage.addListener(async (message: unknown) => {
   try {
     const { success, data } = MessageSchema.safeParse(message);
-    if (!success) throw new Error("Invalid message received");
+    if (!success) return;
 
     ensureModalRootExists();
-    const validatedMessage = data;
 
-    if (
-      validatedMessage.action === `${ACTION_NAME_PREFIX}-enhanceText` &&
-      validatedMessage.text.trim() !== ""
-    ) {
-      const selection = window.getSelection();
-      selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      toggleBodyScroll(true);
-
-      // Dispatch loading event
-      window.dispatchEvent(
-        new CustomEvent("ait-modal-event", {
-          detail: {
-            action: `${ACTION_NAME_PREFIX}-modal-showLoading`,
-            enhancementType: validatedMessage.enhancementType,
-          },
-        })
-      );
-
-      // Send message to background script
-      browser.runtime.sendMessage({
-        ...validatedMessage,
-        action: `${ACTION_NAME_PREFIX}-callAiApi`,
-      } as Message);
-    } else if (validatedMessage.action === `${ACTION_NAME_PREFIX}-replaceText`) {
-      const parentElement = selectedRange?.startContainer.parentElement;
-
-      // Dispatch result event
-      window.dispatchEvent(
-        new CustomEvent("ait-modal-event", {
-          detail: {
-            action: `${ACTION_NAME_PREFIX}-modal-showResult`,
-            enhancementType: validatedMessage.enhancementType,
-            originalText: validatedMessage.originalText,
-            enhancedText: validatedMessage.result,
-            onReplace:
-              parentElement && isEditableElement(parentElement)
-                ? () => {
-                    if (selectedRange) {
-                      selectedRange.deleteContents();
-                      selectedRange.insertNode(document.createTextNode(validatedMessage.result));
-                    }
-                  }
-                : undefined,
-          } as Message,
-        })
-      );
-    } else if (validatedMessage.action === `${ACTION_NAME_PREFIX}-showError`) {
-      // Dispatch error event
-      window.dispatchEvent(
-        new CustomEvent("ait-modal-event", {
-          detail: {
-            action: `${ACTION_NAME_PREFIX}-modal-showError`,
-            error: validatedMessage.error || "An error occurred",
-          },
-        })
-      );
+    if (data.action === ACTIONS.ENHANCE_TEXT) {
+      handleEnhanceTextMessage(data);
+    } else if (data.action === ACTIONS.REPLACE_TEXT) {
+      handleReplaceTextMessage(data);
+    } else if (data.action === ACTIONS.SHOW_ERROR) {
+      handleShowErrorMessage(data);
     }
   } catch (error) {
-    console.error("Invalid message received:", error);
+    console.error("Error processing message:", error);
   }
 });
 
-// Add cleanup when modal closes
-window.addEventListener("ait-modal-event", ((event: CustomEvent) => {
-  const { action } = event.detail;
-  if (action === `${ACTION_NAME_PREFIX}-modal-close`) {
-    toggleBodyScroll(false);
+// Handle custom modal events
+window.addEventListener(MODAL_EVENT_NAME, ((event: CustomEvent) => {
+  const { success, data } = MessageSchema.safeParse(event.detail);
+  if (!success) return;
+
+  if (data.action === ACTIONS.MODAL_CLOSE) {
+    handleModalClose(data);
   }
 }) as EventListener);
+
+document.addEventListener("DOMContentLoaded", ensureModalRootExists);

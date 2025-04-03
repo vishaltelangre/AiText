@@ -1,62 +1,54 @@
 import { z } from "zod";
+import { ACTIONS, ENHANCEMENT_TYPES } from "@/constants";
 
 export const StorageDataSchema = z.object({
   geminiApiKey: z.string().optional(),
 });
 
 export type StorageData = z.infer<typeof StorageDataSchema>;
-export const ACTION_NAME_PREFIX = "ait";
 
-const enhancementTypes = [
-  "fixGrammar",
-  "rephraseSentence",
-  "formalize",
-  "simplify",
-  "summarize",
-] as const;
-export type EnhancementType = (typeof enhancementTypes)[number];
-export const EnhancementTypeSchema = z.enum(enhancementTypes);
+export const EnhancementTypeSchema = z.enum(ENHANCEMENT_TYPES);
 
 export const MessageSchema = z.discriminatedUnion("action", [
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-enhanceText`),
+    action: z.literal(ACTIONS.ENHANCE_TEXT),
     text: z.string(),
     instruction: z.string(),
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-callAiApi`),
+    action: z.literal(ACTIONS.CALL_AI_API),
     text: z.string(),
     instruction: z.string(),
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-replaceText`),
+    action: z.literal(ACTIONS.REPLACE_TEXT),
     originalText: z.string(),
     result: z.string(),
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-showError`),
+    action: z.literal(ACTIONS.SHOW_ERROR),
     error: z.string().optional(),
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-modal-showError`),
+    action: z.literal(ACTIONS.MODAL_SHOW_ERROR),
     error: z.string().optional(),
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-modal-showLoading`),
+    action: z.literal(ACTIONS.MODAL_SHOW_LOADING),
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-modal-showResult`),
+    action: z.literal(ACTIONS.MODAL_SHOW_RESULT),
     enhancementType: EnhancementTypeSchema,
     originalText: z.string(),
     enhancedText: z.string(),
     onReplace: z.function().optional(),
   }),
   z.object({
-    action: z.literal(`${ACTION_NAME_PREFIX}-modal-close`),
+    action: z.literal(ACTIONS.MODAL_CLOSE),
   }),
 ]);
 

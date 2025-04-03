@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ACTION_NAME_PREFIX, type EnhancementType } from "@/schemas";
+import { type EnhancementType, ACTIONS, MODAL_EVENT_NAME } from "@/constants";
 import { CrossIcon, LoadingSpinnerIcon, PencilIcon, SparklesIcon } from "@/components/Icons";
+import { MessageSchema } from "@/schemas";
 
 type ModalState =
   | { type: "closed" }
@@ -187,48 +188,45 @@ export const Modal = () => {
 
   useEffect(() => {
     const handleModalEvent = (event: CustomEvent) => {
-      const { action, ...data } = event.detail;
+      const { success, data } = MessageSchema.safeParse(event.detail);
+      if (!success) return;
 
-      switch (action) {
-        case `${ACTION_NAME_PREFIX}-modal-showLoading`:
-          setState({
-            type: "loading",
-            enhancementType: data.enhancementType,
-          });
-          break;
-        case `${ACTION_NAME_PREFIX}-modal-showResult`:
-          setState({
-            type: "result",
-            enhancementType: data.enhancementType,
-            originalText: data.originalText,
-            enhancedText: data.enhancedText,
-            onReplace: data.onReplace,
-          });
-          break;
-        case `${ACTION_NAME_PREFIX}-modal-showError`:
-          setState({
-            type: "error",
-            errorMessage: data.error || "An unknown error occurred",
-          });
-          break;
-        case `${ACTION_NAME_PREFIX}-modal-close`:
-          setState({ type: "closed" });
-          break;
+      if (data.action === ACTIONS.MODAL_SHOW_LOADING) {
+        setState({
+          type: "loading",
+          enhancementType: data.enhancementType,
+        });
+      } else if (data.action === ACTIONS.MODAL_SHOW_RESULT) {
+        setState({
+          type: "result",
+          enhancementType: data.enhancementType,
+          originalText: data.originalText,
+          enhancedText: data.enhancedText,
+          onReplace: data.onReplace,
+        });
+      } else if (data.action === ACTIONS.MODAL_SHOW_ERROR) {
+        setState({
+          type: "error",
+          errorMessage: data.error || "An unknown error occurred",
+        });
+      } else if (data.action === ACTIONS.MODAL_CLOSE) {
+        setState({ type: "closed" });
       }
     };
 
-    window.addEventListener("ait-modal-event", handleModalEvent as EventListener);
+    window.addEventListener(MODAL_EVENT_NAME, handleModalEvent as EventListener);
     return () => {
-      window.removeEventListener("ait-modal-event", handleModalEvent as EventListener);
+      window.removeEventListener(MODAL_EVENT_NAME, handleModalEvent as EventListener);
     };
   }, []);
 
-  const handleClose = () =>
+  const handleClose = () => {
     window.dispatchEvent(
-      new CustomEvent("ait-modal-event", {
-        detail: { action: `${ACTION_NAME_PREFIX}-modal-close` },
+      new CustomEvent(MODAL_EVENT_NAME, {
+        detail: { action: ACTIONS.MODAL_CLOSE },
       })
     );
+  };
 
   if (state.type === "closed") return null;
 
