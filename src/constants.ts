@@ -15,7 +15,7 @@ export const ACTIONS = {
 
 export const ENHANCEMENT_TYPES = [
   "fixGrammar",
-  "rephraseSentence",
+  "rephrase",
   "formalize",
   "simplify",
   "summarize",

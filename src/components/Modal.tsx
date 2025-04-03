@@ -37,9 +37,9 @@ const getActionTitle = (type: EnhancementType): { action: string; loading: strin
       action: "Enhanced with grammar fix",
       loading: "Fixing grammar",
     },
-    rephraseSentence: {
+    rephrase: {
       action: "Rephrased",
-      loading: "Rephrasing sentence",
+      loading: "Rephrasing text",
     },
     formalize: {
       action: "Formalized",

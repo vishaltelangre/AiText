@@ -10,8 +10,8 @@ const menuItems = [
     instruction: "Fix the grammar and make any necessary corrections in the given text.",
   },
   {
-    id: "rephraseSentence",
-    title: "Rephrase Sentence",
+    id: "rephrase",
+    title: "Rephrase",
     instruction: "Rephrase the given text to convey the same meaning in a different way.",
   },
   {
