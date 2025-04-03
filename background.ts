@@ -1,4 +1,4 @@
-import { type Message, MessageSchema } from "@/schemas";
+import { MessageSchema } from "@/schemas";
 import { callAiApi } from "@/data";
 import { ACTIONS } from "@/constants";
 import { sendContentMessageToTab } from "@/utils";
@@ -103,12 +103,14 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
               enhancementType: data.enhancementType,
             });
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             if (error instanceof DOMException && error.name === "AbortError") return;
 
+            const errorMessage =
+              error instanceof Error ? error.message : "An unknown error occurred";
             sendContentMessageToTab(tabId, {
               action: ACTIONS.MODAL_SHOW_ERROR,
-              error: error.message,
+              error: errorMessage,
             });
           });
       }, 300);

@@ -1,4 +1,4 @@
-import { GeminiApiErrorSchema, GeminiApiResponseSchema } from "@/schemas";
+import { GeminiApiErrorSchema, GeminiApiResponseSchema, StorageDataSchema } from "@/schemas";
 
 export async function callAiApi(
   text: string,
@@ -15,7 +15,9 @@ export async function callGeminiApi(
   signal?: AbortSignal
 ): Promise<string> {
   if (!apiKey) {
-    const data = await browser.storage.sync.get("geminiApiKey");
+    const response = await browser.storage.sync.get("geminiApiKey");
+    const { success, data, error } = StorageDataSchema.safeParse(response);
+    if (!success) throw new Error(error.message);
     apiKey = data.geminiApiKey;
   }
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import ReactDOM from "react-dom/client";
 import { StorageDataSchema } from "@/schemas";
-import { CrossIcon, LoadingSpinnerIcon, VisibilityEyeIcon } from "@/components/Icons";
+import { CrossIcon, VisibilityEyeIcon } from "@/components/Icons";
 import { callGeminiApi } from "@/data";
 import Button from "@/components/Button";
 
@@ -133,6 +133,7 @@ const Options = () => {
                 <a
                   href="https://aistudio.google.com/app/apikey"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="ait-font-medium ait-text-primary hover:ait-text-primary-hover"
                 >
                   Get API key →

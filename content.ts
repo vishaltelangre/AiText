@@ -15,7 +15,7 @@ function toggleBodyScroll(shouldPreventScroll: boolean) {
   }
 }
 
-function ensureModalRootExists(): HTMLElement {
+function ensureModalRootExists() {
   const modalRoot = document.getElementById("ait-root");
   if (!modalRoot) {
     const newModalRoot = document.createElement("div");

@@ -2,7 +2,7 @@ import { Message, MessageSchema } from "@/schemas";
 import { MODAL_EVENT_NAME } from "@/constants";
 
 // Sends a message to the background script
-export function sendRuntimeMessage<T extends Message>(message: T): void {
+export function sendRuntimeMessage<T extends Message>(message: T) {
   const { success } = MessageSchema.safeParse(message);
   if (!success) throw new Error("Invalid runtime message format");
 
@@ -10,7 +10,7 @@ export function sendRuntimeMessage<T extends Message>(message: T): void {
 }
 
 // Sends a message to the content script in a specific tab
-export function sendContentMessageToTab<T extends Message>(tabId: number, message: T): void {
+export function sendContentMessageToTab<T extends Message>(tabId: number, message: T) {
   const { success } = MessageSchema.safeParse(message);
   if (!success) throw new Error("Invalid content message format");
 
@@ -18,7 +18,7 @@ export function sendContentMessageToTab<T extends Message>(tabId: number, messag
 }
 
 // Dispatches a custom event
-export function dispatchModalEvent<T extends Message>(message: T): void {
+export function dispatchModalEvent<T extends Message>(message: T) {
   const { success } = MessageSchema.safeParse(message);
   if (!success) throw new Error("Invalid modal event message format");
 
