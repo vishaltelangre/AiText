@@ -7,34 +7,36 @@ const menuItems = [
   {
     id: "fixGrammar",
     title: "Fix Grammar",
-    instruction:
-      "Fix the grammar and make any necessary corrections in the given text. Don't output anything else. Keep it simple and don't use any heavy or non-standard words. Use plain text for the output.",
+    instruction: "Fix the grammar and make any necessary corrections in the given text.",
   },
   {
     id: "rephraseSentence",
     title: "Rephrase Sentence",
-    instruction:
-      "Rephrase the given text to convey the same meaning in a different way. Don't output anything else. Use plain text for the output.",
+    instruction: "Rephrase the given text to convey the same meaning in a different way.",
   },
   {
     id: "formalize",
     title: "Formalize",
-    instruction:
-      "Make the given text more formal and professional. Don't output anything else. Use plain text for the output.",
+    instruction: "Make the given text more formal and professional.",
   },
   {
     id: "simplify",
     title: "Simplify",
-    instruction:
-      "Simplify the given text to make it easier to understand. Don't output anything else. Use plain text for the output.",
+    instruction: "Simplify the given text to make it easier to understand.",
   },
   {
     id: "summarize",
     title: "Summarize",
-    instruction:
-      "Summarize the given text concisely. Don't output anything else. Use plain text for the output.",
+    instruction: "Summarize the given text concisely.",
   },
 ] as const;
+
+const commonInstruction =
+  "Format your response in markdown. Use markdown features where appropriate to improve readability. Focus on making the text clear and well-structured. Don't say 'Here's a ...' or anything like that. Just return the text.";
+const menuItemsWithInstructions = menuItems.map((item) => ({
+  ...item,
+  instruction: `${item.instruction} ${commonInstruction}`,
+}));
 
 browser.runtime.onInstalled.addListener(() => {
   browser.contextMenus.create({
@@ -43,7 +45,7 @@ browser.runtime.onInstalled.addListener(() => {
     contexts: ["selection"],
   });
 
-  menuItems.forEach((item) => {
+  menuItemsWithInstructions.forEach((item) => {
     browser.contextMenus.create({
       id: item.id,
       parentId: "ait-context-menu",

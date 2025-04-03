@@ -137,3 +137,77 @@
 body.ait-modal-open {
   overflow: hidden !important;
 }
+
+/* Markdown Styles */
+.ait-markdown-content {
+  @apply ait-text-base ait-leading-relaxed;
+}
+
+.ait-markdown-content h1 {
+  @apply ait-mb-4 ait-mt-6 ait-text-2xl ait-font-bold;
+}
+
+.ait-markdown-content h2 {
+  @apply ait-mb-3 ait-mt-5 ait-text-xl ait-font-bold;
+}
+
+.ait-markdown-content h3 {
+  @apply ait-mb-2 ait-mt-4 ait-text-lg ait-font-bold;
+}
+
+.ait-markdown-content p {
+  @apply ait-mb-4;
+}
+
+.ait-markdown-content ul {
+  @apply ait-my-4 ait-list-disc ait-pl-5;
+}
+
+.ait-markdown-content ol {
+  @apply ait-my-4 ait-list-decimal ait-pl-5;
+}
+
+.ait-markdown-content li {
+  @apply ait-mb-1;
+}
+
+.ait-markdown-content li > ul,
+.ait-markdown-content li > ol {
+  @apply ait-my-1 ait-ml-4;
+}
+
+.ait-markdown-content a {
+  @apply ait-text-blue-600 ait-underline hover:ait-text-blue-800;
+}
+
+.ait-markdown-content blockquote {
+  @apply ait-my-4 ait-border-l-4 ait-border-gray-300 ait-pl-4 ait-italic;
+}
+
+.ait-markdown-content code {
+  @apply ait-rounded ait-bg-gray-100 ait-px-1 ait-py-0.5 ait-font-mono ait-text-sm;
+}
+
+.ait-markdown-content pre {
+  @apply ait-mb-4 ait-overflow-x-auto ait-rounded ait-bg-gray-100 ait-p-4;
+}
+
+.ait-markdown-content pre code {
+  @apply ait-bg-transparent ait-p-0;
+}
+
+.ait-markdown-content table {
+  @apply ait-mb-4 ait-min-w-full ait-border ait-border-gray-300;
+}
+
+.ait-markdown-content th {
+  @apply ait-border ait-border-gray-300 ait-bg-gray-100 ait-px-4 ait-py-2 ait-text-left;
+}
+
+.ait-markdown-content td {
+  @apply ait-border ait-border-gray-300 ait-px-4 ait-py-2;
+}
+
+.ait-markdown-content hr {
+  @apply ait-my-8 ait-border-t ait-border-gray-300;
+}

@@ -11,6 +11,7 @@ import {
 import { MessageSchema } from "@/schemas";
 import { dispatchModalEvent } from "@/utils";
 import { Button } from "@/components/Button";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
 type ModalState =
   | { type: "closed" }
@@ -185,9 +186,7 @@ const ResultModal = ({
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
             <div className="ait-prose ait-prose-sm ait-mx-auto ait-max-w-[450px] ait-max-w-none ait-text-gray-800">
-              {enhancedText.split("\n").map((line, i) => (
-                <p key={i}>{line}</p>
-              ))}
+              <MarkdownRenderer content={enhancedText} />
             </div>
           </div>
         </div>
