@@ -5,7 +5,7 @@
   "scripts": {
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
     "build:ts": "webpack --config webpack.config.js --mode production",
-    "build": "pnpm format:check && pnpm build:css && pnpm build:ts",
+    "build": "rm -rf dist && pnpm type-check && pnpm format:check && pnpm build:css && pnpm build:ts",
     "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
     "watch:ts": "webpack --config webpack.config.js --watch --mode development",
     "watch": "concurrently \"pnpm watch:css\" \"pnpm watch:ts\"",
@@ -31,6 +31,7 @@
     "autoprefixer": "^10.4.17",
     "concurrently": "^9.1.2",
     "css-loader": "^6.10.0",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
     "postcss": "^8.4.35",
     "postcss-loader": "^8.1.0",
     "prettier": "^3.5.3",
