@@ -6,7 +6,7 @@ export const ACTIONS = {
   ENHANCE_TEXT: `${UNIQUE_PREFIX}-enhanceText`,
   CALL_AI_API: `${UNIQUE_PREFIX}-callAiApi`,
   SHOW_ENHANCED_TEXT: `${UNIQUE_PREFIX}-showEnhancedText`,
-  SHOW_ERROR: `${UNIQUE_PREFIX}-showError`,
+  OPEN_SETTINGS_PAGE: `${UNIQUE_PREFIX}-openSettingsPage`,
   MODAL_SHOW_LOADING: `${UNIQUE_PREFIX}-modal-showLoading`,
   MODAL_SHOW_ENHANCED_TEXT: `${UNIQUE_PREFIX}-modal-showEnhancedText`,
   MODAL_SHOW_ERROR: `${UNIQUE_PREFIX}-modal-showError`,

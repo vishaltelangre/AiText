@@ -29,8 +29,7 @@ export const MessageSchema = z.discriminatedUnion("action", [
     enhancementType: EnhancementTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.SHOW_ERROR),
-    error: z.string().optional(),
+    action: z.literal(ACTIONS.OPEN_SETTINGS_PAGE),
   }),
   z.object({
     action: z.literal(ACTIONS.MODAL_SHOW_ERROR),

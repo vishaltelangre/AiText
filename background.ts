@@ -78,6 +78,11 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
     const { success, data } = MessageSchema.safeParse(message);
     if (!success) throw new Error("Invalid message received");
 
+    if (data.action === ACTIONS.OPEN_SETTINGS_PAGE) {
+      browser.runtime.openOptionsPage();
+      return true;
+    }
+
     if (data.action === ACTIONS.CALL_AI_API && sender.tab?.id) {
       if (debounceTimeout) clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {

@@ -81,15 +81,11 @@ function handleShowEnhancedTextMessage(
   });
 }
 
-function handleShowErrorMessage(message: Message & { action: typeof ACTIONS.SHOW_ERROR }) {
+function handleShowErrorMessage(message: Message & { action: typeof ACTIONS.MODAL_SHOW_ERROR }) {
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_ERROR,
     error: message.error || "An error occurred",
   });
-}
-
-function handleModalClose(message: Message & { action: typeof ACTIONS.MODAL_CLOSE }) {
-  toggleBodyScroll(false);
 }
 
 ensureModalRootExists();
@@ -106,7 +102,7 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
       handleEnhanceTextMessage(data);
     } else if (data.action === ACTIONS.SHOW_ENHANCED_TEXT) {
       handleShowEnhancedTextMessage(data);
-    } else if (data.action === ACTIONS.SHOW_ERROR) {
+    } else if (data.action === ACTIONS.MODAL_SHOW_ERROR) {
       handleShowErrorMessage(data);
     }
   } catch (error) {
@@ -120,6 +116,8 @@ window.addEventListener(MODAL_EVENT_NAME, ((event: CustomEvent) => {
   if (!success) return;
 
   if (data.action === ACTIONS.MODAL_CLOSE) {
-    handleModalClose(data);
+    toggleBodyScroll(false);
+  } else if (data.action === ACTIONS.OPEN_SETTINGS_PAGE) {
+    sendRuntimeMessage({ action: ACTIONS.OPEN_SETTINGS_PAGE });
   }
 }) as EventListener);

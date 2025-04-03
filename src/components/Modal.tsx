@@ -65,7 +65,7 @@ type ModalLayoutProps = {
 const ModalLayout = ({ title, onClose, children, footer }: ModalLayoutProps) => {
   return (
     <>
-      <div className="ait-flex ait-items-center ait-justify-between ait-bg-gray-50 ait-px-6 ait-py-4">
+      <div className="ait-flex ait-items-center ait-justify-between ait-border-b ait-border-gray-200 ait-bg-gray-50 ait-px-6 ait-py-4">
         <div className="ait-flex ait-items-center ait-gap-3">
           <img
             src={browser.runtime.getURL("icons/icon-128.png")}
@@ -82,7 +82,7 @@ const ModalLayout = ({ title, onClose, children, footer }: ModalLayoutProps) => 
           <CrossIcon />
         </button>
       </div>
-      <div className="ait-flex ait-min-h-0 ait-flex-1 ait-flex-col ait-overflow-hidden">
+      <div className="ait-flex ait-min-h-0 ait-flex-1 ait-flex-col ait-overflow-hidden ait-bg-white">
         {children}
       </div>
       {footer && (
@@ -212,9 +212,20 @@ type ErrorModalProps = {
 
 const ErrorModal = ({ errorMessage, onClose }: ErrorModalProps) => {
   return (
-    <ModalLayout title="Error" onClose={onClose}>
-      <div className="ait-p-6">
-        <div className="ait-font-medium ait-text-red-600">{errorMessage}</div>
+    <ModalLayout
+      title="Error"
+      onClose={onClose}
+      footer={
+        <button
+          className="focus:ait-ring-primary/50 ait-rounded-lg ait-bg-gray-100 ait-px-4 ait-py-2 ait-text-sm ait-font-medium ait-text-gray-700 ait-transition-colors hover:ait-bg-gray-200 focus:ait-ring-2 focus:ait-ring-offset-2"
+          onClick={() => dispatchModalEvent({ action: ACTIONS.OPEN_SETTINGS_PAGE })}
+        >
+          Check settings
+        </button>
+      }
+    >
+      <div className="ait-flex ait-flex-col ait-p-6">
+        <div className="ait-text-red-600">{errorMessage}</div>
       </div>
     </ModalLayout>
   );
