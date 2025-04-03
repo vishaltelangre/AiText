@@ -41,7 +41,7 @@ const Popup = () => {
       <div className="ait-w-[320px] ait-p-4">
         <div className="ait-flex ait-items-center ait-gap-3">
           <img
-            src={browser.runtime.getURL("icons/icon-48.png")}
+            src={browser.runtime.getURL("icons/icon-128.png")}
             alt={browser.runtime.getManifest().name}
             className="ait-h-8 ait-w-8"
           />
@@ -49,9 +49,9 @@ const Popup = () => {
             <h1 className="ait-text-lg ait-font-semibold ait-text-gray-800">
               {browser.runtime.getManifest().name}
             </h1>
-            <p className="ait-text-sm ait-text-gray-500">
+            <small className="ait-text-sm ait-text-gray-500">
               {browser.runtime.getManifest().description}
-            </p>
+            </small>
           </div>
         </div>
 

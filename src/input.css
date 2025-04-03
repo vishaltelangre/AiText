@@ -73,6 +73,11 @@
   text-decoration: inherit;
 }
 
+/* Paragraphs */
+.ait-root p:not(:first-child) {
+  margin-top: calc(var(--spacing) * 6);
+}
+
 /* Form elements */
 .ait-root button,
 .ait-root input,
@@ -105,6 +110,7 @@
 .ait-root {
   --primary: #3b82f6;
   --primary-hover: #2563eb;
+  --spacing: 0.25rem;
 }
 
 /* Animations */

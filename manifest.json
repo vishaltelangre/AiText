@@ -30,7 +30,7 @@
     }
   ],
   "browser_action": {
-    "default_icon": "icons/icon-48.png",
+    "default_icon": "icons/icon-128.png",
     "default_title": "AiText",
     "default_popup": "popup/popup.html"
   },
