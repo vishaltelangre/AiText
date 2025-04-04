@@ -13,39 +13,33 @@ type LoadingType = "save-settings" | "test-api-key";
 type TabType = "api" | "menu";
 
 const Options = () => {
-  const [apiKey, setApiKey] = useState("");
   const [alert, setAlert] = useState<{ message: string; type: AlertType } | null>(null);
   const alertTimeoutRef = useRef<number | null>(null);
   const [isLoading, setIsLoading] = useState<LoadingType | null>(null);
-  const [customContextMenuItems, setCustomContextMenuItems] = useState<CustomContextMenuItem[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>("api");
+  const [apiKey, setApiKey] = useState("");
 
   useEffect(() => {
-    const restoreSettings = async () => {
-      try {
-        const { success, data, error } = await getStorageData([
-          STORAGE_KEYS.GEMINI_API_KEY,
-          STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS,
-        ]);
-        if (!success) throw new Error(`Storage Error: ${error.message}`);
-        const geminiApiKey = data[STORAGE_KEYS.GEMINI_API_KEY];
-        if (geminiApiKey) {
-          setApiKey(geminiApiKey.trim());
-        }
-        const customContextMenuItems = data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS];
-        if (customContextMenuItems) {
-          setCustomContextMenuItems(customContextMenuItems);
-        }
-      } catch (error) {
-        console.error("Error loading options:", error);
-      }
+    const restoreApiKey = async () => {
+      const { success, data, error } = await getStorageData([STORAGE_KEYS.GEMINI_API_KEY]);
+      if (!success) throw new Error(`Storage Error: ${error.message}`);
+      const geminiApiKey = data[STORAGE_KEYS.GEMINI_API_KEY];
+      if (geminiApiKey) setApiKey(geminiApiKey.trim());
     };
 
-    restoreSettings();
+    restoreApiKey();
 
-    // Set page title
-    document.title = browser.runtime.getManifest().name;
+    // Set page's title
+    document.title = `${browser.runtime.getManifest().name} - Settings`;
   }, []);
+
+  const showAlert = (message: string, type: AlertType, autoHideTimeout = 5000) => {
+    if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
+
+    setAlert({ message, type });
+
+    alertTimeoutRef.current = setTimeout(() => setAlert(null), autoHideTimeout);
+  };
 
   const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +48,6 @@ const Options = () => {
     try {
       await setStorageData({
         [STORAGE_KEYS.GEMINI_API_KEY]: apiKey.trim(),
-        [STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]: customContextMenuItems,
       });
       showAlert("Settings saved!", "success");
     } catch (error) {
@@ -67,19 +60,17 @@ const Options = () => {
     }
   };
 
-  const showAlert = (message: string, type: AlertType, autoHideTimeout = 5000) => {
-    if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
-
-    setAlert({ message, type });
-
-    alertTimeoutRef.current = setTimeout(() => setAlert(null), autoHideTimeout);
-  };
-
   return (
     <div className="ait-root">
       <div className="ait-mx-auto ait-max-w-2xl ait-p-6">
-        <form onSubmit={saveSettings} className="ait-space-y-6">
-          <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="ait-space-y-6">
+          <TabNavigation
+            activeTab={activeTab}
+            setActiveTab={(tab) => {
+              setActiveTab(tab);
+              setAlert(null);
+            }}
+          />
 
           {activeTab === "api" ? (
             <ApiSettingsTab
@@ -90,10 +81,7 @@ const Options = () => {
               showAlert={showAlert}
             />
           ) : (
-            <ContextMenuItemsTab
-              initialItems={customContextMenuItems}
-              onSave={(items) => setCustomContextMenuItems(items)}
-            />
+            <ContextMenuItemsTab showAlert={showAlert} />
           )}
 
           <div className="ait-flex ait-items-center ait-justify-between ait-px-2 ait-py-1">
@@ -105,16 +93,18 @@ const Options = () => {
             >
               {alert?.message}
             </div>
-            <Button
-              variant="primary"
-              disabled={isLoading !== null}
-              loading={isLoading === "save-settings"}
-              type="submit"
-            >
-              Save
-            </Button>
+            {activeTab !== "menu" ? (
+              <Button
+                variant="primary"
+                disabled={isLoading !== null}
+                loading={isLoading === "save-settings"}
+                onClick={saveSettings}
+              >
+                Save
+              </Button>
+            ) : null}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
@@ -275,57 +265,84 @@ const ApiSettingsTab = ({
   );
 };
 
-type ContextMenuItemsTabProps = {
-  initialItems: CustomContextMenuItem[];
-  onSave: (items: CustomContextMenuItem[]) => void;
-};
-
-const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps) => {
-  const [customContextMenuItems, setCustomContextMenuItems] =
-    useState<CustomContextMenuItem[]>(initialItems);
-  const [editingContextMenuItem, setEditingContextMenuItem] = useState<
+const ContextMenuItemsTab = ({
+  showAlert,
+}: {
+  showAlert: (message: string, type: AlertType) => void;
+}) => {
+  const [items, setItems] = useState<CustomContextMenuItem[]>([]);
+  const [editingItem, setEditingItem] = useState<
     (CustomContextMenuItem & { index: number }) | null
   >(null);
-  const [newContextMenuItem, setNewContextMenuItem] = useState<CustomContextMenuItem>({
+  const [newItem, setNewItem] = useState<CustomContextMenuItem>({
     id: "",
     title: "",
     instruction: "",
   });
 
-  // Save changes to parent whenever items change
   useEffect(() => {
-    onSave(customContextMenuItems);
-  }, [customContextMenuItems, onSave]);
+    const restoreContextMenuItems = async () => {
+      const { success, data, error } = await getStorageData([
+        STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS,
+      ]);
+      if (!success) throw new Error(`Storage Error: ${error.message}`);
+      const items = data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS];
+      if (items) setItems(items);
+    };
 
-  const addContextMenuItem = () => {
-    if (!newContextMenuItem.title || !newContextMenuItem.instruction) {
+    restoreContextMenuItems();
+  }, []);
+
+  const saveItems = async (items: CustomContextMenuItem[]) => {
+    try {
+      await setStorageData({
+        [STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]: items,
+      });
+      showAlert("Context menu items saved!", "success");
+    } catch (error) {
+      showAlert(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while saving context menu items",
+        "error"
+      );
+    }
+  };
+
+  const setAndSaveItems = (items: CustomContextMenuItem[]) => {
+    setItems(items);
+    saveItems(items);
+  };
+
+  const addItem = () => {
+    if (!newItem.title || !newItem.instruction) {
       return;
     }
 
-    const id = newContextMenuItem.title.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (customContextMenuItems.some((item) => item.id === id)) {
+    const id = newItem.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (items.some((item) => item.id === id)) {
       return;
     }
 
-    setCustomContextMenuItems([...customContextMenuItems, { ...newContextMenuItem, id }]);
-    setNewContextMenuItem({ id: "", title: "", instruction: "" });
+    setAndSaveItems([...items, { ...newItem, id }]);
+    setNewItem({ id: "", title: "", instruction: "" });
   };
 
-  const removeContextMenuItem = (id: string) => {
-    setCustomContextMenuItems(customContextMenuItems.filter((item) => item.id !== id));
+  const removeItem = (id: string) => {
+    setAndSaveItems(items.filter((item) => item.id !== id));
   };
 
-  const startEditingContextMenuItem = (item: CustomContextMenuItem, index: number) => {
-    setEditingContextMenuItem({ ...item, index });
+  const startEditingItem = (item: CustomContextMenuItem, index: number) => {
+    setEditingItem({ ...item, index });
   };
 
-  const saveEditingContextMenuItem = () => {
-    if (!editingContextMenuItem) return;
+  const saveEditingItem = () => {
+    if (!editingItem) return;
 
-    const newItems = [...customContextMenuItems];
-    newItems[editingContextMenuItem.index] = editingContextMenuItem;
-    setCustomContextMenuItems(newItems);
-    setEditingContextMenuItem(null);
+    const newItems = [...items];
+    newItems[editingItem.index] = editingItem;
+    setAndSaveItems(newItems);
+    setEditingItem(null);
   };
 
   return (
@@ -359,12 +376,12 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
           <div>
             <h3 className="ait-mb-2 ait-text-sm ait-font-medium ait-text-gray-700">Custom items</h3>
             <div className="ait-space-y-3">
-              {customContextMenuItems.map((item, index) => (
+              {items.map((item, index) => (
                 <div
                   key={item.id}
                   className="ait-flex ait-items-start ait-gap-4 ait-rounded-lg ait-border ait-border-gray-200 ait-p-4"
                 >
-                  {editingContextMenuItem?.id === item.id ? (
+                  {editingItem?.id === item.id ? (
                     <div className="ait-flex-1 ait-space-y-3">
                       <div>
                         <label className="ait-mb-1 ait-block ait-text-sm ait-font-medium ait-text-gray-700">
@@ -372,10 +389,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                         </label>
                         <input
                           type="text"
-                          value={editingContextMenuItem.title}
+                          value={editingItem.title}
                           onChange={(e) =>
-                            setEditingContextMenuItem({
-                              ...editingContextMenuItem,
+                            setEditingItem({
+                              ...editingItem,
                               title: e.target.value,
                             })
                           }
@@ -387,10 +404,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                           Instruction
                         </label>
                         <textarea
-                          value={editingContextMenuItem.instruction}
+                          value={editingItem.instruction}
                           onChange={(e) =>
-                            setEditingContextMenuItem({
-                              ...editingContextMenuItem,
+                            setEditingItem({
+                              ...editingItem,
                               instruction: e.target.value,
                             })
                           }
@@ -399,10 +416,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                         />
                       </div>
                       <div className="ait-flex ait-justify-end ait-gap-2">
-                        <Button variant="secondary" onClick={() => setEditingContextMenuItem(null)}>
+                        <Button variant="secondary" onClick={() => setEditingItem(null)}>
                           Cancel
                         </Button>
-                        <Button variant="primary" onClick={saveEditingContextMenuItem}>
+                        <Button variant="primary" onClick={saveEditingItem}>
                           Save
                         </Button>
                       </div>
@@ -416,13 +433,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                         </div>
                       </div>
                       <div className="ait-flex ait-gap-2">
-                        <Button
-                          variant="secondary"
-                          onClick={() => startEditingContextMenuItem(item, index)}
-                        >
+                        <Button variant="secondary" onClick={() => startEditingItem(item, index)}>
                           Edit
                         </Button>
-                        <Button variant="secondary" onClick={() => removeContextMenuItem(item.id)}>
+                        <Button variant="secondary" onClick={() => removeItem(item.id)}>
                           Remove
                         </Button>
                       </div>
@@ -439,10 +453,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                   </label>
                   <input
                     type="text"
-                    value={newContextMenuItem.title}
+                    value={newItem.title}
                     onChange={(e) =>
-                      setNewContextMenuItem({
-                        ...newContextMenuItem,
+                      setNewItem({
+                        ...newItem,
                         title: e.target.value,
                       })
                     }
@@ -455,10 +469,10 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                     Instruction
                   </label>
                   <textarea
-                    value={newContextMenuItem.instruction}
+                    value={newItem.instruction}
                     onChange={(e) =>
-                      setNewContextMenuItem({
-                        ...newContextMenuItem,
+                      setNewItem({
+                        ...newItem,
                         instruction: e.target.value,
                       })
                     }
@@ -470,8 +484,8 @@ const ContextMenuItemsTab = ({ initialItems, onSave }: ContextMenuItemsTabProps)
                 <div className="ait-flex ait-justify-end">
                   <Button
                     variant="secondary"
-                    onClick={addContextMenuItem}
-                    disabled={!newContextMenuItem.title || !newContextMenuItem.instruction}
+                    onClick={addItem}
+                    disabled={!newItem.title || !newItem.instruction}
                   >
                     Add item
                   </Button>
