@@ -89,6 +89,20 @@ pnpm build
 
 Note: The add-on will need to be reloaded in Firefox after each build to see your changes. Temporary add-ons are removed when Firefox is closed and will need to be loaded again the next time you open Firefox.
 
+## Packaging
+
+1. Bump up the version in the `manifest.json` file.
+
+2. To package the add-on for distribution:
+
+```bash
+pnpm package
+```
+
+This will create a zip file in the root of the project called `ai-text-*.zip`.
+
+3. Upload the zip file to the [Firefox Add-ons site](https://addons.mozilla.org/en-US/developers/addon/aitext/versions/submit/).
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

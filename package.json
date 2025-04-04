@@ -14,7 +14,8 @@
     "format:check": "prettier --log-level silent --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "prepare": "pnpm format && ./scripts/setup-hooks.sh",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "package": "./scripts/package-extension.sh"
   },
   "dependencies": {
     "@types/dompurify": "^3.2.0",
