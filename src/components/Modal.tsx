@@ -49,23 +49,31 @@ const getActionTitle = (
   const defaultTitles: Record<DefaultInstructionType, { action: string; loading: string }> = {
     fixGrammar: {
       action: "Enhanced with grammar fix",
-      loading: "Fixing grammar",
+      loading: "Fixing grammar...",
     },
     rephrase: {
       action: "Rephrased",
-      loading: "Rephrasing text",
+      loading: "Rephrasing...",
     },
     formalize: {
       action: "Formalized",
-      loading: "Formalizing text",
+      loading: "Formalizing...",
     },
     simplify: {
       action: "Simplified",
-      loading: "Simplifying text",
+      loading: "Simplifying...",
     },
     summarize: {
       action: "Summarized",
-      loading: "Summarizing text",
+      loading: "Summarizing...",
+    },
+    explain: {
+      action: "Explained",
+      loading: "Explaining...",
+    },
+    define: {
+      action: "Defined",
+      loading: "Defining...",
     },
   };
 

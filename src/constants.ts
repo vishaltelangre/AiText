@@ -26,6 +26,8 @@ export const DEFAULT_INSTRUCTION_TYPES = [
   "formalize",
   "simplify",
   "summarize",
+  "explain",
+  "define",
 ] as const;
 
 export type DefaultInstructionType = (typeof DEFAULT_INSTRUCTION_TYPES)[number];
