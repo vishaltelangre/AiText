@@ -1,4 +1,6 @@
-import { GeminiApiErrorSchema, GeminiApiResponseSchema, StorageDataSchema } from "@/schemas";
+import { GeminiApiErrorSchema, GeminiApiResponseSchema } from "@/schemas";
+import { STORAGE_KEYS } from "@/constants";
+import { getStorageData } from "@/utils";
 
 export async function callAiApi(
   text: string,
@@ -15,10 +17,9 @@ export async function callGeminiApi(
   signal?: AbortSignal
 ): Promise<string> {
   if (!apiKey) {
-    const response = await browser.storage.sync.get("geminiApiKey");
-    const { success, data, error } = StorageDataSchema.safeParse(response);
+    const { success, data, error } = await getStorageData([STORAGE_KEYS.GEMINI_API_KEY]);
     if (!success) throw new Error(error.message);
-    apiKey = data.geminiApiKey;
+    apiKey = data[STORAGE_KEYS.GEMINI_API_KEY];
   }
 
   if (!apiKey) throw new Error("API key not set");

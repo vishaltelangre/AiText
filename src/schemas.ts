@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ACTIONS, DEFAULT_INSTRUCTION_TYPES } from "@/constants";
+import { ACTIONS, DEFAULT_INSTRUCTION_TYPES, STORAGE_KEYS } from "@/constants";
 
 export type DefaultInstructionType = (typeof DEFAULT_INSTRUCTION_TYPES)[number];
 export type CustomInstructionType = string;
@@ -20,8 +20,8 @@ export const CustomContextMenuItemSchema = z.object({
 export const CustomContextMenuItemsSchema = z.array(CustomContextMenuItemSchema);
 
 export const StorageDataSchema = z.object({
-  geminiApiKey: z.string().optional(),
-  customContextMenuItems: CustomContextMenuItemsSchema.optional(),
+  [STORAGE_KEYS.GEMINI_API_KEY]: z.string().optional(),
+  [STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]: CustomContextMenuItemsSchema.optional(),
 });
 
 export type StorageData = z.infer<typeof StorageDataSchema>;

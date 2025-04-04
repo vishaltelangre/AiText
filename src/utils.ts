@@ -1,4 +1,4 @@
-import { Message, MessageSchema } from "@/schemas";
+import { Message, MessageSchema, StorageData, StorageDataSchema } from "@/schemas";
 import { MODAL_EVENT_NAME } from "@/constants";
 
 // Sends a message to the background script
@@ -23,4 +23,13 @@ export function dispatchModalEvent<T extends Message>(message: T) {
   if (!success) throw new Error("Invalid modal event message format");
 
   window.dispatchEvent(new CustomEvent(MODAL_EVENT_NAME, { detail: message }));
+}
+
+export async function setStorageData(data: Partial<StorageData>) {
+  await browser.storage.sync.set(data);
+}
+
+export async function getStorageData(keys: (keyof StorageData)[]) {
+  const res = await browser.storage.sync.get(keys);
+  return StorageDataSchema.safeParse(res);
 }

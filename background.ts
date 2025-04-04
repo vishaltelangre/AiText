@@ -1,20 +1,20 @@
-import { CustomContextMenuItemsSchema, MessageSchema } from "@/schemas";
+import { MessageSchema } from "@/schemas";
 import { callAiApi } from "@/data";
-import { ACTIONS, defaultContextMenuItems } from "@/constants";
-import { sendContentMessageToTab } from "@/utils";
+import { ACTIONS, DEFAULT_CONTEXT_MENU_ITEMS, STORAGE_KEYS } from "@/constants";
+import { getStorageData, sendContentMessageToTab } from "@/utils";
 
 const commonInstruction =
   "Format your response in markdown. Use markdown features where appropriate to improve readability making it clear and well-structured. Don't say 'Here's a ...' or anything like that. Just return the text.";
 
 const getContextMenuItems = async () => {
   try {
-    const res = await browser.storage.sync.get("customContextMenuItems");
-    const { success, data } = CustomContextMenuItemsSchema.safeParse(res.customContextMenuItems);
-    if (!success) return defaultContextMenuItems;
-    return [...defaultContextMenuItems, ...data];
+    const res = await getStorageData([STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]);
+    if (!res.success) return DEFAULT_CONTEXT_MENU_ITEMS;
+    const customContextMenuItems = res.data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS] || [];
+    return [...DEFAULT_CONTEXT_MENU_ITEMS, ...customContextMenuItems];
   } catch (error) {
     console.error("Error loading custom menu items:", error);
-    return defaultContextMenuItems;
+    return DEFAULT_CONTEXT_MENU_ITEMS;
   }
 };
 
@@ -44,7 +44,7 @@ const createContextMenu = async () => {
 browser.runtime.onInstalled.addListener(createContextMenu);
 
 browser.storage.onChanged.addListener((changes) => {
-  if (changes.customContextMenuItems) createContextMenu();
+  if (changes[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]) createContextMenu();
 });
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {

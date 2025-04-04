@@ -1,5 +1,10 @@
 export const UNIQUE_PREFIX = "ait";
 
+export const STORAGE_KEYS = {
+  CUSTOM_CONTEXT_MENU_ITEMS: `${UNIQUE_PREFIX}-customContextMenuItems`,
+  GEMINI_API_KEY: `${UNIQUE_PREFIX}-geminiApiKey`,
+} as const;
+
 export const MODAL_EVENT_NAME = `${UNIQUE_PREFIX}-modal-event`;
 
 export const ACTIONS = {
@@ -23,7 +28,7 @@ export const DEFAULT_INSTRUCTION_TYPES = [
 
 export type DefaultInstructionType = (typeof DEFAULT_INSTRUCTION_TYPES)[number];
 
-export const defaultContextMenuItems = [
+export const DEFAULT_CONTEXT_MENU_ITEMS = [
   {
     id: "fixGrammar",
     title: "Fix Grammar",

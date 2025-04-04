@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { clsx } from "clsx";
-import { StorageDataSchema } from "@/schemas";
 import { CheckIcon, CrossIcon, SettingsIcon } from "@/components/Icons";
 import Button from "@/components/Button";
+import { STORAGE_KEYS } from "@/constants";
+import { getStorageData } from "@/utils";
 
 type ApiKeyStatus = {
   hasKey: boolean;
@@ -19,10 +20,9 @@ const Popup = () => {
   useEffect(() => {
     const checkApiKey = async () => {
       try {
-        const res = await browser.storage.sync.get("geminiApiKey");
-        const { success, data, error } = StorageDataSchema.safeParse(res);
+        const { success, data, error } = await getStorageData([STORAGE_KEYS.GEMINI_API_KEY]);
         if (!success) throw new Error(error.message);
-        setApiKeyStatus({ hasKey: !!data.geminiApiKey, error: null });
+        setApiKeyStatus({ hasKey: !!data[STORAGE_KEYS.GEMINI_API_KEY], error: null });
       } catch (error) {
         setApiKeyStatus({
           hasKey: false,

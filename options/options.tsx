@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import ReactDOM from "react-dom/client";
-import { StorageDataSchema, type CustomContextMenuItem } from "@/schemas";
+import { type CustomContextMenuItem } from "@/schemas";
 import { CrossIcon, VisibilityEyeIcon, LockIcon } from "@/components/Icons";
 import { callGeminiApi } from "@/data";
 import Button from "@/components/Button";
-import { defaultContextMenuItems } from "@/constants";
+import { DEFAULT_CONTEXT_MENU_ITEMS, STORAGE_KEYS } from "@/constants";
+import { getStorageData, setStorageData } from "@/utils";
 
 type AlertType = "success" | "error";
 type LoadingType = "save-settings" | "test-api-key";
@@ -31,14 +32,18 @@ const Options = () => {
   useEffect(() => {
     const restoreSettings = async () => {
       try {
-        const res = await browser.storage.sync.get(["geminiApiKey", "customContextMenuItems"]);
-        const { success, data, error } = StorageDataSchema.safeParse(res);
+        const { success, data, error } = await getStorageData([
+          STORAGE_KEYS.GEMINI_API_KEY,
+          STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS,
+        ]);
         if (!success) throw new Error(`Storage Error: ${error.message}`);
-        if (data.geminiApiKey) {
-          setApiKey(data.geminiApiKey.trim());
+        const geminiApiKey = data[STORAGE_KEYS.GEMINI_API_KEY];
+        if (geminiApiKey) {
+          setApiKey(geminiApiKey.trim());
         }
-        if (data.customContextMenuItems) {
-          setCustomContextMenuItems(data.customContextMenuItems);
+        const customContextMenuItems = data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS];
+        if (customContextMenuItems) {
+          setCustomContextMenuItems(customContextMenuItems);
         }
       } catch (error) {
         console.error("Error loading options:", error);
@@ -56,9 +61,9 @@ const Options = () => {
     setIsLoading("save-settings");
 
     try {
-      await browser.storage.sync.set({
-        geminiApiKey: apiKey.trim(),
-        customContextMenuItems,
+      await setStorageData({
+        [STORAGE_KEYS.GEMINI_API_KEY]: apiKey.trim(),
+        [STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]: customContextMenuItems,
       });
       showAlert("Settings saved!", "success");
     } catch (error) {
@@ -247,7 +252,7 @@ const Options = () => {
                       Default items
                     </h3>
                     <div className="ait-space-y-3">
-                      {defaultContextMenuItems.map((item) => (
+                      {DEFAULT_CONTEXT_MENU_ITEMS.map((item) => (
                         <div
                           key={item.id}
                           className="ait-flex ait-items-start ait-gap-4 ait-rounded-lg ait-border ait-border-gray-100 ait-bg-gray-50 ait-p-4"
