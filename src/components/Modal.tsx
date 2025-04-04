@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { type EnhancementType, ACTIONS, MODAL_EVENT_NAME } from "@/constants";
+import {
+  ACTIONS,
+  MODAL_EVENT_NAME,
+  DEFAULT_INSTRUCTION_TYPES,
+  DefaultInstructionType,
+} from "@/constants";
 import {
   CrossIcon,
   LoadingSpinnerIcon,
@@ -8,7 +13,7 @@ import {
   ClipboardIcon,
   SettingsIcon,
 } from "@/components/Icons";
-import { MessageSchema } from "@/schemas";
+import { MessageSchema, type InstructionType } from "@/schemas";
 import { dispatchModalEvent } from "@/utils";
 import { Button } from "@/components/Button";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -17,13 +22,15 @@ type ModalState =
   | { type: "closed" }
   | {
       type: "loading";
-      enhancementType: EnhancementType;
+      instructionType: InstructionType;
+      operation: string;
     }
   | {
       type: "result";
-      enhancementType: EnhancementType;
+      instructionType: InstructionType;
+      operation: string;
       originalText: string;
-      enhancedText: string;
+      result: string;
       onReplace?: () => void;
     }
   | {
@@ -31,8 +38,15 @@ type ModalState =
       errorMessage: string;
     };
 
-const getActionTitle = (type: EnhancementType): { action: string; loading: string } => {
-  const titles: Record<EnhancementType, { action: string; loading: string }> = {
+function isDefaultInstructionType(type: InstructionType): type is DefaultInstructionType {
+  return DEFAULT_INSTRUCTION_TYPES.includes(type as DefaultInstructionType);
+}
+
+const getActionTitle = (
+  type: InstructionType,
+  operation: string
+): { action: string; loading: string } => {
+  const defaultTitles: Record<DefaultInstructionType, { action: string; loading: string }> = {
     fixGrammar: {
       action: "Enhanced with grammar fix",
       loading: "Fixing grammar",
@@ -55,7 +69,14 @@ const getActionTitle = (type: EnhancementType): { action: string; loading: strin
     },
   };
 
-  return titles[type] || { action: "Enhanced", loading: "Enhancing text" };
+  // Check if it's a default instruction type
+  if (isDefaultInstructionType(type)) return defaultTitles[type];
+
+  // For custom instruction types, use a generic title
+  return {
+    action: `"${operation}" result`,
+    loading: `Performing "${operation}"`,
+  };
 };
 
 type ModalLayoutProps = {
@@ -94,12 +115,13 @@ const ModalLayout = ({ title, onClose, children, footer }: ModalLayoutProps) => 
 };
 
 type LoadingModalProps = {
-  enhancementType: EnhancementType;
+  instructionType: InstructionType;
+  operation: string;
   onClose: () => void;
 };
 
-const LoadingModal = ({ enhancementType, onClose }: LoadingModalProps) => {
-  const { loading } = getActionTitle(enhancementType);
+const LoadingModal = ({ instructionType, operation, onClose }: LoadingModalProps) => {
+  const { loading } = getActionTitle(instructionType, operation);
   return (
     <ModalLayout title={loading} onClose={onClose}>
       <div className="ait-flex ait-flex-col ait-items-center ait-p-12">
@@ -132,21 +154,23 @@ const CopyToClipboard = ({ text }: { text: string }) => {
 };
 
 type ResultModalProps = {
-  enhancementType: EnhancementType;
+  instructionType: InstructionType;
+  operation: string;
   originalText: string;
-  enhancedText: string;
+  result: string;
   onReplace?: () => void;
   onClose: () => void;
 };
 
 const ResultModal = ({
-  enhancementType,
+  instructionType,
+  operation,
   originalText,
-  enhancedText,
+  result,
   onReplace,
   onClose,
 }: ResultModalProps) => {
-  const { action } = getActionTitle(enhancementType);
+  const { action } = getActionTitle(instructionType, operation);
 
   return (
     <ModalLayout
@@ -165,7 +189,7 @@ const ResultModal = ({
           <div className="ait-flex ait-h-12 ait-shrink-0 ait-items-center ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6">
             <div className="ait-flex ait-flex-1 ait-items-center ait-gap-2">
               <PencilIcon />
-              <h3 className="ait-font-medium ait-text-gray-700">Original</h3>
+              <h3 className="ait-font-medium ait-text-gray-700">Selected text</h3>
             </div>
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
@@ -180,13 +204,13 @@ const ResultModal = ({
           <div className="ait-flex ait-h-12 ait-shrink-0 ait-items-center ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6">
             <div className="ait-flex ait-flex-1 ait-items-center ait-gap-2">
               <SparklesIcon />
-              <h3 className="ait-font-medium ait-text-gray-700">Updated</h3>
+              <h3 className="ait-font-medium ait-text-gray-700">Result</h3>
             </div>
-            <CopyToClipboard text={enhancedText} />
+            <CopyToClipboard text={result} />
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
             <div className="ait-prose ait-prose-sm ait-mx-auto ait-max-w-[450px] ait-max-w-none ait-text-gray-800">
-              <MarkdownRenderer content={enhancedText} />
+              <MarkdownRenderer content={result} />
             </div>
           </div>
         </div>
@@ -233,14 +257,16 @@ export const Modal = () => {
       if (data.action === ACTIONS.MODAL_SHOW_LOADING) {
         setState({
           type: "loading",
-          enhancementType: data.enhancementType,
+          instructionType: data.instructionType,
+          operation: data.operation,
         });
-      } else if (data.action === ACTIONS.MODAL_SHOW_ENHANCED_TEXT) {
+      } else if (data.action === ACTIONS.MODAL_SHOW_PROCESSED_TEXT) {
         setState({
           type: "result",
-          enhancementType: data.enhancementType,
+          instructionType: data.instructionType,
+          operation: data.operation,
           originalText: data.originalText,
-          enhancedText: data.enhancedText,
+          result: data.result,
           onReplace: data.onReplace,
         });
       } else if (data.action === ACTIONS.MODAL_SHOW_ERROR) {
@@ -268,12 +294,17 @@ export const Modal = () => {
       <div className="ait-fixed ait-inset-0 ait-z-[10000] ait-flex ait-items-center ait-justify-center ait-bg-gray-900/75 ait-p-4 ait-backdrop-blur-sm">
         <div className="ait-modal-animate ait-flex ait-max-h-[80vh] ait-w-[80%] ait-min-w-[480px] ait-max-w-[800px] ait-flex-col ait-overflow-hidden ait-rounded-2xl ait-bg-gray-50 ait-shadow-2xl">
           {state.type === "loading" ? (
-            <LoadingModal enhancementType={state.enhancementType} onClose={handleClose} />
+            <LoadingModal
+              instructionType={state.instructionType}
+              operation={state.operation}
+              onClose={handleClose}
+            />
           ) : state.type === "result" ? (
             <ResultModal
-              enhancementType={state.enhancementType}
+              instructionType={state.instructionType}
+              operation={state.operation}
               originalText={state.originalText}
-              enhancedText={state.enhancedText}
+              result={state.result}
               onReplace={state.onReplace}
               onClose={handleClose}
             />

@@ -1,32 +1,55 @@
 import { z } from "zod";
-import { ACTIONS, ENHANCEMENT_TYPES } from "@/constants";
+import { ACTIONS, DEFAULT_INSTRUCTION_TYPES } from "@/constants";
+
+export type DefaultInstructionType = (typeof DEFAULT_INSTRUCTION_TYPES)[number];
+export type CustomInstructionType = string;
+export type InstructionType = DefaultInstructionType | CustomInstructionType;
+
+export type CustomContextMenuItem = {
+  id: string;
+  title: string;
+  instruction: string;
+};
+
+export const CustomContextMenuItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  instruction: z.string(),
+});
+
+export const CustomContextMenuItemsSchema = z.array(CustomContextMenuItemSchema);
 
 export const StorageDataSchema = z.object({
   geminiApiKey: z.string().optional(),
+  customContextMenuItems: CustomContextMenuItemsSchema.optional(),
 });
 
 export type StorageData = z.infer<typeof StorageDataSchema>;
 
-export const EnhancementTypeSchema = z.enum(ENHANCEMENT_TYPES);
+// Allow both default and custom instruction types
+export const InstructionTypeSchema = z.string();
 
 export const MessageSchema = z.discriminatedUnion("action", [
   z.object({
-    action: z.literal(ACTIONS.ENHANCE_TEXT),
+    action: z.literal(ACTIONS.PROCESS_TEXT),
     text: z.string(),
     instruction: z.string(),
-    enhancementType: EnhancementTypeSchema,
+    operation: z.string(),
+    instructionType: InstructionTypeSchema,
   }),
   z.object({
     action: z.literal(ACTIONS.CALL_AI_API),
     text: z.string(),
     instruction: z.string(),
-    enhancementType: EnhancementTypeSchema,
+    operation: z.string(),
+    instructionType: InstructionTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.SHOW_ENHANCED_TEXT),
+    action: z.literal(ACTIONS.SHOW_PROCESSED_TEXT),
+    operation: z.string(),
     originalText: z.string(),
     result: z.string(),
-    enhancementType: EnhancementTypeSchema,
+    instructionType: InstructionTypeSchema,
   }),
   z.object({
     action: z.literal(ACTIONS.OPEN_SETTINGS_PAGE),
@@ -37,13 +60,15 @@ export const MessageSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal(ACTIONS.MODAL_SHOW_LOADING),
-    enhancementType: EnhancementTypeSchema,
+    operation: z.string(),
+    instructionType: InstructionTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.MODAL_SHOW_ENHANCED_TEXT),
-    enhancementType: EnhancementTypeSchema,
+    action: z.literal(ACTIONS.MODAL_SHOW_PROCESSED_TEXT),
+    operation: z.string(),
+    instructionType: InstructionTypeSchema,
     originalText: z.string(),
-    enhancedText: z.string(),
+    result: z.string(),
     onReplace: z.function().optional(),
   }),
   z.object({

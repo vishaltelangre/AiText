@@ -1,6 +1,6 @@
 # AiText
 
-An AI-powered text enhancement browser extension.
+A Firefox browser extension that allows you to use AI to do anything with the selected text.
 
 ## Development Setup
 

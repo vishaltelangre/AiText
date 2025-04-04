@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "AiText",
   "version": "1.0",
-  "description": "Enhance selected text with AI",
+  "description": "Use AI to do anything with the selected text!",
   "browser_specific_settings": {
     "gecko": {
       "id": "ai-text-firefox@vishaltelangre.com"

@@ -1,7 +1,7 @@
 {
   "name": "ai-text",
   "version": "1.0.0",
-  "description": "Enhance text with AI",
+  "description": "Use AI to do anything with the selected text!",
   "scripts": {
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
     "build:ts": "webpack --config webpack.config.js --mode production",

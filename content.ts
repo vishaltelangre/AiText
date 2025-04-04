@@ -37,7 +37,7 @@ function isEditableElement(element: Element): boolean {
   );
 }
 
-function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.ENHANCE_TEXT }) {
+function handleProcessTextMessage(message: Message & { action: typeof ACTIONS.PROCESS_TEXT }) {
   if (message.text.trim() === "") return;
 
   const selection = window.getSelection();
@@ -47,7 +47,8 @@ function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.EN
 
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_LOADING,
-    enhancementType: message.enhancementType,
+    operation: message.operation,
+    instructionType: message.instructionType,
   });
 
   toggleBodyScroll(true);
@@ -56,19 +57,21 @@ function handleEnhanceTextMessage(message: Message & { action: typeof ACTIONS.EN
     action: ACTIONS.CALL_AI_API,
     text: message.text,
     instruction: message.instruction,
-    enhancementType: message.enhancementType,
+    operation: message.operation,
+    instructionType: message.instructionType,
   });
 }
 
-function handleShowEnhancedTextMessage(
-  message: Message & { action: typeof ACTIONS.SHOW_ENHANCED_TEXT }
+function handleShowProcessedTextMessage(
+  message: Message & { action: typeof ACTIONS.SHOW_PROCESSED_TEXT }
 ) {
   const parentElement = selectedRange?.startContainer.parentElement;
   dispatchModalEvent({
-    action: ACTIONS.MODAL_SHOW_ENHANCED_TEXT,
-    enhancementType: message.enhancementType,
+    action: ACTIONS.MODAL_SHOW_PROCESSED_TEXT,
+    operation: message.operation,
+    instructionType: message.instructionType,
     originalText: message.originalText,
-    enhancedText: message.result,
+    result: message.result,
     onReplace:
       parentElement && isEditableElement(parentElement)
         ? () => {
@@ -98,10 +101,10 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
 
     ensureModalRootExists();
 
-    if (data.action === ACTIONS.ENHANCE_TEXT) {
-      handleEnhanceTextMessage(data);
-    } else if (data.action === ACTIONS.SHOW_ENHANCED_TEXT) {
-      handleShowEnhancedTextMessage(data);
+    if (data.action === ACTIONS.PROCESS_TEXT) {
+      handleProcessTextMessage(data);
+    } else if (data.action === ACTIONS.SHOW_PROCESSED_TEXT) {
+      handleShowProcessedTextMessage(data);
     } else if (data.action === ACTIONS.MODAL_SHOW_ERROR) {
       handleShowErrorMessage(data);
     }
