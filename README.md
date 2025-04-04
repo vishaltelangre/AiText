@@ -1,6 +1,34 @@
 # AiText
 
+![AiText Banner](./branding/banner.png)
+
 A Firefox browser extension that allows you to use AI to do anything with the selected text.
+
+## Screenshots
+
+![AiText Screenshot 1](./branding/screenshot-1.png)
+
+![AiText Screenshot 2](./branding/screenshot-2.png)
+
+![AiText Screenshot 3](./branding/screenshot-3.png)
+
+![AiText Screenshot 4](./branding/screenshot-4.png)
+
+![AiText Screenshot 5](./branding/screenshot-5.png)
+
+![AiText Screenshot 6](./branding/screenshot-6.png)
+
+![AiText Screenshot 7](./branding/screenshot-7.png)
+
+## Features
+
+- [x] Select any text and right click to get a list of AI actions to perform with the selected text
+- [x] Sensible and useful default context menu actions
+- [x] Easily add custom context menu actions as needed
+- [x] Ability to configure an AI provider, model, and API key
+- [x] Support for Gemini, OpenAI, Anthropic, and DeepSeek
+- [x] Markdown formatting for responses
+- [x] Beautiful and simple UI
 
 ## Development Setup
 
