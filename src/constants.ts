@@ -77,6 +77,7 @@ export const DEFAULT_AI_PROVIDERS_CONFIGS = {
       name: "Google Gemini",
       apiKey: "",
       baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+      getApiKeyUrl: "https://aistudio.google.com/app/apikey",
       model: "gemini-2.0-flash-lite",
     },
     openai: {
@@ -84,6 +85,7 @@ export const DEFAULT_AI_PROVIDERS_CONFIGS = {
       name: "OpenAI",
       apiKey: "",
       baseUrl: "https://api.openai.com/v1",
+      getApiKeyUrl: "https://platform.openai.com/api-keys",
       model: "gpt-4o-mini",
     },
     anthropic: {
@@ -91,6 +93,7 @@ export const DEFAULT_AI_PROVIDERS_CONFIGS = {
       name: "Anthropic",
       apiKey: "",
       baseUrl: "https://api.anthropic.com/v1",
+      getApiKeyUrl: "https://console.anthropic.com/settings/keys",
       model: "claude-3-haiku-20240307",
     },
     deepseek: {
@@ -98,6 +101,7 @@ export const DEFAULT_AI_PROVIDERS_CONFIGS = {
       name: "DeepSeek",
       apiKey: "",
       baseUrl: "https://api.deepseek.com/v1",
+      getApiKeyUrl: "https://platform.deepseek.com/api_keys",
       model: "deepseek-chat",
     },
   },

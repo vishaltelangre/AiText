@@ -28,6 +28,7 @@ export const AiProviderConfigSchema = z.object({
   apiKey: z.string(),
   model: z.string(),
   baseUrl: z.string(),
+  getApiKeyUrl: z.string(),
 });
 
 export type AiProviderConfig = z.infer<typeof AiProviderConfigSchema>;

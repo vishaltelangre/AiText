@@ -255,6 +255,7 @@ const ApiSettingsTab = ({
       name: userConfig?.name ?? defaultConfig.name ?? "",
       apiKey: userConfig?.apiKey ?? defaultConfig.apiKey ?? "",
       baseUrl: userConfig?.baseUrl ?? defaultConfig.baseUrl ?? "",
+      getApiKeyUrl: userConfig?.getApiKeyUrl ?? defaultConfig.getApiKeyUrl ?? "",
       model: userConfig?.model ?? defaultConfig.model ?? "",
     };
   };
@@ -298,6 +299,18 @@ const ApiSettingsTab = ({
               </div>
             </div>
           </div>
+          <p className="ait-mt-2 ait-text-sm ait-text-gray-500">
+            Your API key is stored locally on your device and is only used to make requests to the{" "}
+            {config.name} API.{" "}
+            <a
+              href={config.getApiKeyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ait-font-medium ait-text-primary hover:ait-text-primary-hover"
+            >
+              Get API key →
+            </a>
+          </p>
         </div>
 
         <div>
