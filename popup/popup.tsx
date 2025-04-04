@@ -1,39 +1,35 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { clsx } from "clsx";
-import { CheckIcon, CrossIcon, SettingsIcon } from "@/components/Icons";
+import { CheckIcon, SettingsIcon, RadioIcon } from "@/components/Icons";
 import Button from "@/components/Button";
 import { STORAGE_KEYS } from "@/constants";
 import { getStorageData } from "@/utils";
-
-type ApiKeyStatus = {
-  hasKey: boolean;
-  error: string | null;
-};
+import { AiProvidersConfigs } from "@/schemas";
 
 const Popup = () => {
-  const [apiKeyStatus, setApiKeyStatus] = useState<ApiKeyStatus>({
-    hasKey: false,
-    error: null,
-  });
+  const [aiProvidersConfigs, setAiProvidersConfigs] = useState<AiProvidersConfigs | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkApiKey = async () => {
+    const fetchConfigs = async () => {
       try {
-        const { success, data, error } = await getStorageData([STORAGE_KEYS.GEMINI_API_KEY]);
-        if (!success) throw new Error(error.message);
-        setApiKeyStatus({ hasKey: !!data[STORAGE_KEYS.GEMINI_API_KEY], error: null });
+        const { success, data } = await getStorageData([STORAGE_KEYS.AI_PROVIDERS_CONFIGS]);
+        if (!success) throw new Error("Failed to fetch AI provider data");
+        const configs = data[STORAGE_KEYS.AI_PROVIDERS_CONFIGS];
+        setAiProvidersConfigs(configs || null);
       } catch (error) {
-        setApiKeyStatus({
-          hasKey: false,
-          error: error instanceof Error ? error.message : "Failed to check API key",
-        });
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("Failed to fetch AI provider data");
+        }
       }
     };
 
-    checkApiKey();
+    fetchConfigs();
+  }, []);
 
-    // Set page title
+  useEffect(() => {
     document.title = browser.runtime.getManifest().name;
   }, []);
 
@@ -56,32 +52,73 @@ const Popup = () => {
           </div>
         </div>
 
-        <div
-          className={clsx(
-            "ait-mt-4 ait-flex ait-items-center ait-justify-between ait-rounded-lg ait-border ait-px-4 ait-py-2.5",
-            apiKeyStatus.hasKey
-              ? "ait-border-green-100 ait-bg-green-50"
-              : "ait-border-red-200 ait-bg-red-100/50"
-          )}
-        >
-          <div
-            className={clsx(
-              "ait-flex ait-items-center ait-gap-0.5",
-              apiKeyStatus.hasKey ? "ait-text-green-600" : "ait-text-red-600"
-            )}
-          >
-            {apiKeyStatus.hasKey ? <CheckIcon /> : <CrossIcon />}
-            <span className="ait-text-sm">
-              {apiKeyStatus.hasKey ? "API key is set" : apiKeyStatus.error || "API key is not set"}
-            </span>
-          </div>
+        <div className="ait-mt-4 ait-space-y-4 ait-rounded-lg ait-border ait-border-gray-200 ait-p-4">
+          {aiProvidersConfigs ? (
+            <div className="ait-space-y-3">
+              <h2 className="ait-text-xs ait-font-semibold ait-uppercase ait-text-gray-400">
+                Active AI provider
+              </h2>
 
+              <div className="ait-bg-green-50 ait-px-4 ait-py-3">
+                <div className="ait-flex ait-items-center ait-gap-2">
+                  <div className="ait-text-green-500">
+                    <CheckIcon />
+                  </div>
+                  <div>
+                    <div className="ait-font-medium ait-text-gray-900">
+                      {aiProvidersConfigs.providers[aiProvidersConfigs.activeProvider]?.name}
+                    </div>
+                    <div className="ait-mt-1 ait-text-xs ait-text-gray-500">
+                      {aiProvidersConfigs.providers[aiProvidersConfigs.activeProvider]?.model}
+                    </div>
+                    {aiProvidersConfigs.providers[aiProvidersConfigs.activeProvider]?.apiKey ? (
+                      <div className="ait-mt-1.5 ait-text-sm ait-font-medium ait-text-green-600">
+                        API key is set
+                      </div>
+                    ) : (
+                      <div className="ait-mt-1.5 ait-text-sm ait-font-medium ait-text-red-600">
+                        API key is not set
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <h2 className="ait-text-xs ait-font-semibold ait-uppercase ait-text-gray-400">
+                Other AI providers
+              </h2>
+
+              {Object.entries(aiProvidersConfigs.providers)
+                .filter(([type]) => type !== aiProvidersConfigs.activeProvider)
+                .map(([type, config]) => (
+                  <div
+                    key={type}
+                    className="ait-bg-gray-50 ait-px-4 ait-py-3 ait-text-gray-400 ait-opacity-50"
+                  >
+                    <div className="ait-flex ait-items-center ait-gap-2">
+                      <RadioIcon />
+
+                      <span className="ait-text-lg">{config.name}</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <div className="ait-text-center ait-text-gray-500">
+              {error ? error : "No AI providers found"}
+            </div>
+          )}
+        </div>
+
+        <div className="ait-mt-6 ait-flex ait-justify-end">
           <Button
-            variant="icon"
-            title="Check settings"
+            variant="secondary"
+            title="Open settings"
             onClick={() => browser.runtime.openOptionsPage()}
+            className="ait-flex ait-items-center ait-gap-2 ait-bg-gray-50 ait-text-gray-700"
           >
             <SettingsIcon />
+            <span className="ait-text-base">Settings</span>
           </Button>
         </div>
       </div>

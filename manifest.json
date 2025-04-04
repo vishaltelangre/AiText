@@ -17,7 +17,10 @@
     "contextMenus",
     "storage",
     "activeTab",
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://api.deepseek.com/*"
   ],
   "background": {
     "scripts": ["dist/background.js"]

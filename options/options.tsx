@@ -1,15 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import ReactDOM from "react-dom/client";
-import { type CustomContextMenuItem } from "@/schemas";
+import {
+  type CustomContextMenuItem,
+  AiProviderConfig,
+  AiProvidersConfigs,
+  AiProviderType,
+} from "@/schemas";
 import { CrossIcon, VisibilityEyeIcon, LockIcon } from "@/components/Icons";
-import { callGeminiApi } from "@/data";
+import { createAiProvider } from "@/data";
 import Button from "@/components/Button";
-import { DEFAULT_CONTEXT_MENU_ITEMS, STORAGE_KEYS } from "@/constants";
+import {
+  DEFAULT_AI_PROVIDERS_CONFIGS,
+  DEFAULT_CONTEXT_MENU_ITEMS,
+  STORAGE_KEYS,
+} from "@/constants";
 import { getStorageData, setStorageData } from "@/utils";
 
 type AlertType = "success" | "error";
-type LoadingType = "save-settings" | "test-api-key";
+type LoadingType = "save-configs" | "test-api-connectivity";
 type TabType = "api" | "menu";
 
 const Options = () => {
@@ -18,16 +27,20 @@ const Options = () => {
   const [isLoading, setIsLoading] = useState<LoadingType | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("api");
   const [apiKey, setApiKey] = useState("");
+  const [aiProvidersConfigs, setAiProvidersConfigs] = useState<AiProvidersConfigs>(
+    DEFAULT_AI_PROVIDERS_CONFIGS
+  );
 
   useEffect(() => {
-    const restoreApiKey = async () => {
-      const { success, data, error } = await getStorageData([STORAGE_KEYS.GEMINI_API_KEY]);
+    const restoreConfigs = async () => {
+      const { success, data, error } = await getStorageData([STORAGE_KEYS.AI_PROVIDERS_CONFIGS]);
       if (!success) throw new Error(`Storage Error: ${error.message}`);
-      const geminiApiKey = data[STORAGE_KEYS.GEMINI_API_KEY];
-      if (geminiApiKey) setApiKey(geminiApiKey.trim());
+
+      const configs = data[STORAGE_KEYS.AI_PROVIDERS_CONFIGS];
+      if (configs) setAiProvidersConfigs(configs);
     };
 
-    restoreApiKey();
+    restoreConfigs();
 
     // Set page's title
     document.title = `${browser.runtime.getManifest().name} - Settings`;
@@ -41,14 +54,15 @@ const Options = () => {
     alertTimeoutRef.current = setTimeout(() => setAlert(null), autoHideTimeout);
   };
 
-  const saveSettings = async (e: React.FormEvent) => {
+  const saveConfigs = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading("save-settings");
+    setIsLoading("save-configs");
 
     try {
       await setStorageData({
-        [STORAGE_KEYS.GEMINI_API_KEY]: apiKey.trim(),
+        [STORAGE_KEYS.AI_PROVIDERS_CONFIGS]: aiProvidersConfigs,
       });
+
       showAlert("Settings saved!", "success");
     } catch (error) {
       showAlert(
@@ -79,6 +93,8 @@ const Options = () => {
               isLoading={isLoading}
               setIsLoading={setIsLoading}
               showAlert={showAlert}
+              aiProvidersConfigs={aiProvidersConfigs}
+              setAiProvidersConfigs={setAiProvidersConfigs}
             />
           ) : (
             <ContextMenuItemsTab showAlert={showAlert} />
@@ -97,8 +113,8 @@ const Options = () => {
               <Button
                 variant="primary"
                 disabled={isLoading !== null}
-                loading={isLoading === "save-settings"}
-                onClick={saveSettings}
+                loading={isLoading === "save-configs"}
+                onClick={saveConfigs}
               >
                 Save
               </Button>
@@ -137,6 +153,7 @@ type TabNavigationProps = {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
 };
+
 const TabNavigation = ({ activeTab, setActiveTab }: TabNavigationProps) => {
   return (
     <div className="ait-border-b ait-border-gray-200">
@@ -164,101 +181,224 @@ type ApiSettingsTabProps = {
   isLoading: LoadingType | null;
   setIsLoading: (loading: LoadingType | null) => void;
   showAlert: (message: string, type: AlertType, autoHideTimeout?: number) => void;
+  aiProvidersConfigs: AiProvidersConfigs;
+  setAiProvidersConfigs: React.Dispatch<React.SetStateAction<AiProvidersConfigs>>;
 };
 
 const ApiSettingsTab = ({
-  apiKey,
-  setApiKey,
   isLoading,
   setIsLoading,
   showAlert,
+  aiProvidersConfigs,
+  setAiProvidersConfigs,
 }: ApiSettingsTabProps) => {
   const [showKey, setShowKey] = useState(false);
 
-  const testApiKey = async () => {
-    if (apiKey.length === 0) {
+  const updateProviderConfig = (type: AiProviderType, config: Partial<AiProviderConfig>) => {
+    setAiProvidersConfigs((prev) => ({
+      ...prev,
+      providers: {
+        ...prev.providers,
+        [type]: { ...prev.providers[type], ...config },
+      },
+    }));
+  };
+
+  const setActiveProvider = (type: AiProviderType) => {
+    setAiProvidersConfigs((prev) => ({
+      ...prev,
+      activeProvider: type,
+    }));
+  };
+
+  const testAiProviderConnectivity = async (type: AiProviderType) => {
+    const config = aiProvidersConfigs.providers[type];
+    if (!config) {
+      showAlert("Provider settings not found", "error");
+      return;
+    }
+
+    if (!config.apiKey) {
       showAlert("Please enter an API key first", "error");
       return;
     }
 
-    setIsLoading("test-api-key");
+    if (!config.baseUrl) {
+      showAlert("Base URL is required", "error");
+      return;
+    }
+
+    setIsLoading("test-api-connectivity");
+
+    const providerName = aiProvidersConfigs.providers[type]?.name ?? type;
 
     try {
-      await callGeminiApi("Test", "Test", apiKey);
-      showAlert("API key is valid!", "success");
+      await createAiProvider(type, config).testConnectivity();
+      showAlert(`Connection to ${providerName} works!`, "success");
     } catch (error) {
       if (error instanceof Error) {
         showAlert(error.message, "error");
       } else {
-        showAlert("An error occurred while testing the API key", "error");
+        showAlert(`Failed to connect to ${providerName}`, "error");
       }
     } finally {
       setIsLoading(null);
     }
   };
 
-  return (
-    <div className="ait-rounded-lg ait-border ait-border-gray-200 ait-bg-white ait-shadow-sm">
-      <div className="ait-p-6">
+  const getAiProviderConfig = (type: AiProviderType): AiProviderConfig => {
+    const defaultConfig = DEFAULT_AI_PROVIDERS_CONFIGS.providers[type];
+    const userConfig = aiProvidersConfigs.providers[type];
+
+    return {
+      type,
+      name: userConfig?.name ?? defaultConfig.name ?? "",
+      apiKey: userConfig?.apiKey ?? defaultConfig.apiKey ?? "",
+      baseUrl: userConfig?.baseUrl ?? defaultConfig.baseUrl ?? "",
+      model: userConfig?.model ?? defaultConfig.model ?? "",
+    };
+  };
+
+  const renderProviderSettings = (type: AiProviderType) => {
+    const config = getAiProviderConfig(type);
+    const defaultConfig = DEFAULT_AI_PROVIDERS_CONFIGS.providers[type];
+
+    return (
+      <div className="ait-space-y-4">
         <div>
-          <div className="ait-flex ait-items-center ait-justify-between ait-gap-4">
-            <div className="ait-flex-1">
-              <label className="ait-mb-1 ait-block ait-text-sm ait-font-medium ait-text-gray-700">
-                Gemini API Key
-              </label>
-              <div className="ait-flex ait-items-center ait-gap-2">
-                <div className="ait-relative ait-mt-1 ait-flex-1">
-                  <input
-                    type={showKey ? "text" : "password"}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value.trim())}
-                    placeholder="Enter your API key"
-                    className="ait-block ait-w-full ait-rounded-md ait-border ait-border-gray-300 ait-px-3 ait-py-2 ait-text-sm ait-placeholder-gray-400 ait-shadow-sm focus:ait-border-primary focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary disabled:ait-cursor-not-allowed disabled:ait-bg-gray-50 disabled:ait-text-gray-500"
-                    disabled={isLoading !== null}
-                  />
-                  <div className="ait-absolute ait-right-1 ait-top-0 ait-flex ait-h-full ait-items-center">
-                    <Button
-                      variant="icon"
-                      onClick={() => setShowKey(!showKey)}
-                      title={showKey ? "Hide API key" : "Show API key"}
-                    >
-                      <VisibilityEyeIcon open={showKey} />
-                    </Button>
-                    {apiKey.length > 0 ? (
-                      <Button
-                        variant="icon"
-                        onClick={() => setApiKey("")}
-                        disabled={isLoading !== null}
-                        title="Clear API key"
-                      >
-                        <CrossIcon />
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
+          <label className="ait-mb-1 ait-block ait-text-sm ait-font-medium ait-text-gray-700">
+            API Key
+          </label>
+          <div className="ait-flex ait-items-center ait-gap-2">
+            <div className="ait-relative ait-mt-1 ait-flex-1">
+              <input
+                type={showKey ? "text" : "password"}
+                value={config.apiKey}
+                onChange={(e) => updateProviderConfig(type, { apiKey: e.target.value.trim() })}
+                placeholder="Enter your API key"
+                className="ait-block ait-w-full ait-rounded-md ait-border ait-border-gray-300 ait-px-3 ait-py-2 ait-text-sm ait-placeholder-gray-400 ait-shadow-sm focus:ait-border-primary focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary"
+              />
+              <div className="ait-absolute ait-right-1 ait-top-0 ait-flex ait-h-full ait-items-center">
                 <Button
-                  variant="secondary"
-                  onClick={testApiKey}
-                  disabled={isLoading !== null}
-                  loading={isLoading === "test-api-key"}
+                  variant="icon"
+                  onClick={() => setShowKey(!showKey)}
+                  title={showKey ? "Hide API key" : "Show API key"}
                 >
-                  Test connectivity
+                  <VisibilityEyeIcon open={showKey} />
                 </Button>
+                {config.apiKey && (
+                  <Button
+                    variant="icon"
+                    onClick={() => updateProviderConfig(type, { apiKey: "" })}
+                    title="Clear API key"
+                  >
+                    <CrossIcon />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
-          <p className="ait-mt-2 ait-text-sm ait-text-gray-500">
-            Your API key is stored locally on your device and is only used to make requests to the
-            Gemini API.{" "}
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ait-font-medium ait-text-primary hover:ait-text-primary-hover"
-            >
-              Get API key →
-            </a>
-          </p>
+        </div>
+
+        <div>
+          <div className="ait-flex ait-items-center ait-justify-between">
+            <label className="ait-mb-1 ait-block ait-text-sm ait-font-medium ait-text-gray-700">
+              Base URL
+            </label>
+            {config.baseUrl !== defaultConfig.baseUrl && (
+              <Button
+                variant="secondary"
+                onClick={() => updateProviderConfig(type, { baseUrl: defaultConfig.baseUrl })}
+                className="ait-bg-transparent ait-text-xs"
+              >
+                Reset to default
+              </Button>
+            )}
+          </div>
+          <input
+            type="text"
+            value={config.baseUrl}
+            onChange={(e) => updateProviderConfig(type, { baseUrl: e.target.value.trim() })}
+            placeholder={defaultConfig.baseUrl}
+            className="ait-block ait-w-full ait-rounded-md ait-border ait-border-gray-300 ait-px-3 ait-py-2 ait-text-sm ait-placeholder-gray-400 ait-shadow-sm focus:ait-border-primary focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary"
+          />
+        </div>
+
+        <div>
+          <div className="ait-flex ait-items-center ait-justify-between">
+            <label className="ait-mb-1 ait-block ait-text-sm ait-font-medium ait-text-gray-700">
+              Model
+            </label>
+            {config.model !== defaultConfig.model && (
+              <Button
+                variant="secondary"
+                onClick={() => updateProviderConfig(type, { model: defaultConfig.model })}
+                className="ait-bg-transparent ait-text-xs"
+              >
+                Reset to default
+              </Button>
+            )}
+          </div>
+          <input
+            type="text"
+            value={config.model}
+            onChange={(e) => updateProviderConfig(type, { model: e.target.value.trim() })}
+            placeholder={defaultConfig.model}
+            className="ait-block ait-w-full ait-rounded-md ait-border ait-border-gray-300 ait-px-3 ait-py-2 ait-text-sm ait-placeholder-gray-400 ait-shadow-sm focus:ait-border-primary focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary"
+          />
+        </div>
+
+        <div className="ait-flex ait-justify-end">
+          <Button
+            variant="secondary"
+            onClick={() => testAiProviderConnectivity(type)}
+            disabled={isLoading !== null}
+            loading={isLoading === "test-api-connectivity"}
+          >
+            Test connectivity
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="ait-rounded-lg ait-border ait-border-gray-200 ait-bg-white ait-shadow-sm">
+      <div className="ait-p-6">
+        <div className="ait-space-y-6">
+          {(Object.keys(aiProvidersConfigs.providers) as AiProviderType[]).map((type) => (
+            <div key={type} className="ait-space-y-4">
+              <div className="ait-flex ait-items-center ait-justify-between">
+                <div className="ait-flex ait-items-center ait-gap-2">
+                  <button
+                    onClick={() => setActiveProvider(type)}
+                    className={clsx(
+                      "duration-200 ease-in-out ait-relative ait-inline-flex ait-h-6 ait-w-11 ait-flex-shrink-0 ait-cursor-pointer ait-rounded-full ait-border-2 ait-border-transparent ait-transition-colors focus:ait-outline-none focus:ait-ring-2 focus:ait-ring-primary focus:ait-ring-offset-2",
+                      aiProvidersConfigs.activeProvider === type
+                        ? "ait-bg-primary"
+                        : "ait-bg-gray-200"
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        "duration-200 ease-in-out ait-pointer-events-none ait-inline-block ait-h-5 ait-w-5 ait-transform ait-rounded-full ait-bg-white ait-shadow ait-ring-0 ait-transition",
+                        aiProvidersConfigs.activeProvider === type
+                          ? "ait-translate-x-5"
+                          : "ait-translate-x-0"
+                      )}
+                    />
+                  </button>
+                  <span className="ait-text-sm ait-font-medium ait-text-gray-900">
+                    {aiProvidersConfigs.providers[type]?.name ?? type}
+                  </span>
+                </div>
+              </div>
+
+              {aiProvidersConfigs.activeProvider === type && (
+                <div className="ait-ml-8 ait-space-y-4">{renderProviderSettings(type)}</div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

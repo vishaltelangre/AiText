@@ -19,8 +19,28 @@ export const CustomContextMenuItemSchema = z.object({
 
 export const CustomContextMenuItemsSchema = z.array(CustomContextMenuItemSchema);
 
+export const AiProviderTypeSchema = z.enum(["gemini", "openai", "anthropic", "deepseek"]);
+export type AiProviderType = z.infer<typeof AiProviderTypeSchema>;
+
+export const AiProviderConfigSchema = z.object({
+  type: AiProviderTypeSchema,
+  name: z.string(),
+  apiKey: z.string(),
+  model: z.string(),
+  baseUrl: z.string(),
+});
+
+export type AiProviderConfig = z.infer<typeof AiProviderConfigSchema>;
+
+export const AiProvidersConfigsSchema = z.object({
+  activeProvider: AiProviderTypeSchema,
+  providers: z.record(AiProviderTypeSchema, AiProviderConfigSchema),
+});
+
+export type AiProvidersConfigs = z.infer<typeof AiProvidersConfigsSchema>;
+
 export const StorageDataSchema = z.object({
-  [STORAGE_KEYS.GEMINI_API_KEY]: z.string().optional(),
+  [STORAGE_KEYS.AI_PROVIDERS_CONFIGS]: AiProvidersConfigsSchema.optional(),
   [STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]: CustomContextMenuItemsSchema.optional(),
 });
 
@@ -78,17 +98,15 @@ export const MessageSchema = z.discriminatedUnion("action", [
 
 export type Message = z.infer<typeof MessageSchema>;
 
-export const GeminiApiErrorSchema = z.object({
+// Gemini API schemas
+export const GeminiApiErrorResponseSchema = z.object({
   error: z
     .object({
       message: z.string(),
     })
     .optional(),
 });
-
-export type GeminiApiError = z.infer<typeof GeminiApiErrorSchema>;
-
-export const GeminiApiResponseSchema = z.object({
+export const GeminiApiSuccessResponseSchema = z.object({
   candidates: z.array(
     z.object({
       content: z.object({
@@ -98,4 +116,34 @@ export const GeminiApiResponseSchema = z.object({
   ),
 });
 
-export type GeminiApiResponse = z.infer<typeof GeminiApiResponseSchema>;
+// OpenAI API schemas
+export const OpenAiApiErrorResponseSchema = z.object({
+  error: z
+    .object({
+      message: z.string(),
+    })
+    .optional(),
+});
+export const OpenAiApiSuccessResponseSchema = z.object({
+  choices: z.array(z.object({ message: z.object({ content: z.string() }) })),
+});
+
+// Anthropic API schemas
+export const AnthropicApiErrorResponseSchema = z.object({
+  error: z.object({
+    message: z.string(),
+  }),
+});
+export const AnthropicApiSuccessResponseSchema = z.object({
+  content: z.array(z.object({ text: z.string() })),
+});
+
+// DeepSeek API schemas
+export const DeepSeekApiErrorResponseSchema = z.object({
+  error: z.object({
+    message: z.string(),
+  }),
+});
+export const DeepSeekApiSuccessResponseSchema = z.object({
+  choices: z.array(z.object({ message: z.object({ content: z.string() }) })),
+});

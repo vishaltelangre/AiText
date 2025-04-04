@@ -12,6 +12,12 @@ export const CrossIcon = () => (
   </svg>
 );
 
+export const RadioIcon = () => (
+  <svg className="ait-h-5 ait-w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+  </svg>
+);
+
 export const SettingsIcon = () => (
   <svg className="ait-h-5 ait-w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path

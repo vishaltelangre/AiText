@@ -1,7 +1,7 @@
 import { MessageSchema } from "@/schemas";
-import { callAiApi } from "@/data";
 import { ACTIONS, DEFAULT_CONTEXT_MENU_ITEMS, STORAGE_KEYS } from "@/constants";
-import { getStorageData, sendContentMessageToTab } from "@/utils";
+import { getActiveAiProviderConfig, getStorageData, sendContentMessageToTab } from "@/utils";
+import { createAiProvider } from "@/data";
 
 const commonInstruction =
   "Format your response in markdown. Use markdown features where appropriate to improve readability making it clear and well-structured. Don't say 'Here's a ...' or anything like that. Just return the text.";
@@ -85,33 +85,36 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
 
     if (data.action === ACTIONS.CALL_AI_API && sender.tab?.id) {
       if (debounceTimeout) clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(() => {
+      debounceTimeout = setTimeout(async () => {
         abortController?.abort();
         abortController = new AbortController();
         const tabId = sender.tab?.id;
         if (!tabId) return;
 
-        const promise = callAiApi(data.text, data.instruction, abortController.signal);
-        promise
-          .then((result) => {
-            sendContentMessageToTab(tabId, {
-              action: ACTIONS.SHOW_PROCESSED_TEXT,
-              operation: data.operation,
-              result,
-              originalText: data.text,
-              instructionType: data.instructionType,
-            });
-          })
-          .catch((error: unknown) => {
-            if (error instanceof DOMException && error.name === "AbortError") return;
-
-            const errorMessage =
-              error instanceof Error ? error.message : "An unknown error occurred";
-            sendContentMessageToTab(tabId, {
-              action: ACTIONS.MODAL_SHOW_ERROR,
-              error: errorMessage,
-            });
+        try {
+          const config = await getActiveAiProviderConfig();
+          const result = await createAiProvider(config.type, config).callApi(
+            data.text,
+            data.instruction,
+            abortController?.signal
+          );
+          sendContentMessageToTab(tabId, {
+            action: ACTIONS.SHOW_PROCESSED_TEXT,
+            operation: data.operation,
+            result,
+            originalText: data.text,
+            instructionType: data.instructionType,
           });
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+
+          console.error("Error getting active AI provider config:", error);
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          sendContentMessageToTab(tabId, {
+            action: ACTIONS.MODAL_SHOW_ERROR,
+            error: errorMessage,
+          });
+        }
       }, 300);
     }
   } catch (error) {

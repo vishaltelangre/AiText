@@ -1,8 +1,10 @@
+import { AiProvidersConfigs } from "@/schemas";
+
 export const UNIQUE_PREFIX = "ait";
 
 export const STORAGE_KEYS = {
   CUSTOM_CONTEXT_MENU_ITEMS: `${UNIQUE_PREFIX}-customContextMenuItems`,
-  GEMINI_API_KEY: `${UNIQUE_PREFIX}-geminiApiKey`,
+  AI_PROVIDERS_CONFIGS: `${UNIQUE_PREFIX}-aiProvidersConfigs`,
 } as const;
 
 export const MODAL_EVENT_NAME = `${UNIQUE_PREFIX}-modal-event`;
@@ -66,3 +68,37 @@ export const DEFAULT_CONTEXT_MENU_ITEMS = [
       "Define the given word or phrase. Only provide pronunciation, concise definition, and simple examples.",
   },
 ] as const;
+
+export const DEFAULT_AI_PROVIDERS_CONFIGS = {
+  activeProvider: "gemini" as const,
+  providers: {
+    gemini: {
+      type: "gemini",
+      name: "Google Gemini",
+      apiKey: "",
+      baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+      model: "gemini-2.0-flash-lite",
+    },
+    openai: {
+      type: "openai",
+      name: "OpenAI",
+      apiKey: "",
+      baseUrl: "https://api.openai.com/v1",
+      model: "gpt-4o-mini",
+    },
+    anthropic: {
+      type: "anthropic",
+      name: "Anthropic",
+      apiKey: "",
+      baseUrl: "https://api.anthropic.com/v1",
+      model: "claude-3-haiku-20240307",
+    },
+    deepseek: {
+      type: "deepseek",
+      name: "DeepSeek",
+      apiKey: "",
+      baseUrl: "https://api.deepseek.com/v1",
+      model: "deepseek-chat",
+    },
+  },
+} satisfies AiProvidersConfigs;
