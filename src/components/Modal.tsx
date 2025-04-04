@@ -287,11 +287,30 @@ export const Modal = () => {
 
   const handleClose = () => dispatchModalEvent({ action: ACTIONS.MODAL_CLOSE });
 
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handleClose();
+    };
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, []);
+
   if (state.type === "closed") return null;
 
   return (
     <>
-      <div className="ait-fixed ait-inset-0 ait-z-[10000] ait-flex ait-items-center ait-justify-center ait-bg-gray-900/75 ait-p-4 ait-backdrop-blur-sm">
+      <div
+        className="ait-fixed ait-inset-0 ait-z-[10000] ait-flex ait-items-center ait-justify-center ait-bg-gray-900/75 ait-p-4 ait-backdrop-blur-sm"
+        onClick={(e) => {
+          // Only close if clicking directly on the backdrop (not on modal content)
+          if (e.target === e.currentTarget) {
+            handleClose();
+          }
+        }}
+      >
         <div className="ait-modal-animate ait-flex ait-max-h-[80vh] ait-w-[80%] ait-min-w-[480px] ait-max-w-[800px] ait-flex-col ait-overflow-hidden ait-rounded-2xl ait-bg-gray-50 ait-shadow-2xl">
           {state.type === "loading" ? (
             <LoadingModal
