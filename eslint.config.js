@@ -9,7 +9,7 @@ const globals = require("globals");
 module.exports = [
   js.configs.recommended,
   {
-    ignores: ["**/dist-chrome/**", "**/dist-firefox/**", "**/node_modules/**"],
+    ignores: ["**/dist-chrome/**", "**/dist-firefox/**", "**/node_modules/**", "**/archives/**"],
   },
   {
     files: ["**/*.js", "**/*.cjs"],

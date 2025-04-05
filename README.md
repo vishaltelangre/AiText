@@ -121,7 +121,7 @@ pnpm package
 This will:
 
 1. Prompt for a new version (or keep the current one)
-2. Update version in manifest.json and package.json
+2. Update version in `manifest.json` and `package.json`
 3. Build the extension for both Firefox and Chrome
 4. Create the following files in the `archives` directory:
    - `ai-text-firefox-<version>.zip` - Firefox distribution package

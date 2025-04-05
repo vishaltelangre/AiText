@@ -21,9 +21,12 @@ class ExtensionPlugin {
       // Read and parse the manifest
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
-      // For Chrome, remove the scripts field from background
       if (process.env.BROWSER === "chrome") {
+        // For Chrome, remove the background.scripts field from background
         delete manifest.background.scripts;
+      } else if (process.env.BROWSER === "firefox") {
+        // For Firefox, remove the background.service_worker field from background
+        delete manifest.background.service_worker;
       }
 
       // Write the modified manifest
