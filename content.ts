@@ -4,9 +4,6 @@ import { Modal } from "@/components/Modal";
 import { Message, MessageSchema } from "@/schemas";
 import { MODAL_EVENT_NAME, ACTIONS } from "@/constants";
 import { sendRuntimeMessage, dispatchModalEvent } from "@/utils";
-import DOMPurify from "dompurify";
-
-let selectedRange: Range | null = null;
 
 function toggleBodyScroll(shouldPreventScroll: boolean) {
   if (shouldPreventScroll) {
@@ -30,21 +27,8 @@ function ensureModalRootExists() {
   return modalRoot;
 }
 
-function isEditableElement(element: Element): boolean {
-  return (
-    element instanceof HTMLInputElement ||
-    element instanceof HTMLTextAreaElement ||
-    element.hasAttribute("contenteditable")
-  );
-}
-
 function handleProcessTextMessage(message: Message & { action: typeof ACTIONS.PROCESS_TEXT }) {
   if (message.text.trim() === "") return;
-
-  const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    selectedRange = selection.getRangeAt(0);
-  }
 
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_LOADING,
@@ -66,25 +50,12 @@ function handleProcessTextMessage(message: Message & { action: typeof ACTIONS.PR
 function handleShowProcessedTextMessage(
   message: Message & { action: typeof ACTIONS.SHOW_PROCESSED_TEXT }
 ) {
-  const parentElement = selectedRange?.startContainer.parentElement;
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_PROCESSED_TEXT,
     operation: message.operation,
     instructionType: message.instructionType,
     originalText: message.originalText,
     result: message.result,
-    onReplace:
-      parentElement && isEditableElement(parentElement)
-        ? () => {
-            if (selectedRange) {
-              const sanitizedText = DOMPurify.sanitize(message.result, { ALLOWED_TAGS: [] });
-              selectedRange.deleteContents();
-              const textNode = document.createTextNode(sanitizedText);
-              selectedRange.insertNode(textNode);
-              selectedRange.collapse(false);
-            }
-          }
-        : undefined,
   });
 }
 

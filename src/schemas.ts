@@ -90,7 +90,6 @@ export const MessageSchema = z.discriminatedUnion("action", [
     instructionType: InstructionTypeSchema,
     originalText: z.string(),
     result: z.string(),
-    onReplace: z.function().optional(),
   }),
   z.object({
     action: z.literal(ACTIONS.MODAL_CLOSE),

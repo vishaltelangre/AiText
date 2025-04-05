@@ -31,7 +31,6 @@ type ModalState =
       operation: string;
       originalText: string;
       result: string;
-      onReplace?: () => void;
     }
   | {
       type: "error";
@@ -166,7 +165,6 @@ type ResultModalProps = {
   operation: string;
   originalText: string;
   result: string;
-  onReplace?: () => void;
   onClose: () => void;
 };
 
@@ -175,23 +173,12 @@ const ResultModal = ({
   operation,
   originalText,
   result,
-  onReplace,
   onClose,
 }: ResultModalProps) => {
   const { action } = getActionTitle(instructionType, operation);
 
   return (
-    <ModalLayout
-      title={action}
-      onClose={onClose}
-      footer={
-        onReplace ? (
-          <Button variant="primary" onClick={onReplace}>
-            Replace
-          </Button>
-        ) : undefined
-      }
-    >
+    <ModalLayout title={action} onClose={onClose}>
       <div className="ait-grid ait-min-h-0 ait-flex-1 ait-grid-cols-2 ait-divide-x ait-divide-gray-200">
         <div className="ait-flex ait-flex-col ait-overflow-hidden">
           <div className="ait-flex ait-h-12 ait-shrink-0 ait-items-center ait-border-y ait-border-gray-200 ait-bg-gray-50/50 ait-px-6">
@@ -275,7 +262,6 @@ export const Modal = () => {
           operation: data.operation,
           originalText: data.originalText,
           result: data.result,
-          onReplace: data.onReplace,
         });
       } else if (data.action === ACTIONS.MODAL_SHOW_ERROR) {
         setState({
@@ -332,7 +318,6 @@ export const Modal = () => {
               operation={state.operation}
               originalText={state.originalText}
               result={state.result}
-              onReplace={state.onReplace}
               onClose={handleClose}
             />
           ) : state.type === "error" ? (
