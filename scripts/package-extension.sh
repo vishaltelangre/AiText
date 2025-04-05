@@ -3,6 +3,41 @@
 # Exit on error
 set -e
 
+# Get current version from manifest.json
+CURRENT_VERSION=$(grep '"version":' manifest.json | cut -d'"' -f4)
+echo "Current version: $CURRENT_VERSION"
+
+# Prompt for new version
+read -p "Enter new version (press Enter to keep current version): " NEW_VERSION
+if [ -z "$NEW_VERSION" ]; then
+    NEW_VERSION=$CURRENT_VERSION
+fi
+
+# Update versions in both files
+echo "Updating version to $NEW_VERSION..."
+
+# Detect OS and use appropriate sed command
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" manifest.json
+    sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" package.json
+else
+    # Linux
+    sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" manifest.json
+    sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" package.json
+fi
+
+# Check if files were modified
+if ! git diff --quiet manifest.json package.json; then
+    # Prompt for git commit
+    read -p "Do you want to commit version changes to git? (y/N): " COMMIT_CHANGES
+    if [[ $COMMIT_CHANGES =~ ^[Yy]$ ]]; then
+        git add manifest.json package.json
+        git commit -m "Bump version to v$NEW_VERSION"
+        echo "Version changes committed to git"
+    fi
+fi
+
 # Build the extension
 echo "Building the extension..."
 pnpm build
@@ -26,7 +61,7 @@ cp LICENSE "$TEMP_DIR/"
 
 # Create the zip file
 echo "Creating zip file..."
-ZIP_NAME="ai-text-firefox-$(grep '"version":' manifest.json | cut -d'"' -f4).zip"
+ZIP_NAME="ai-text-firefox-$NEW_VERSION.zip"
 rm -f "$ZIP_NAME"
 cd "$TEMP_DIR"
 zip -r "../$ZIP_NAME" ./*

@@ -91,17 +91,15 @@ Note: The add-on will need to be reloaded in Firefox after each build to see you
 
 ## Packaging
 
-1. Bump up the version in the `manifest.json` file.
-
-2. To package the add-on for distribution:
+1. To package the add-on for distribution:
 
 ```bash
 pnpm package
 ```
 
-This will create a zip file in the root of the project called `ai-text-*.zip`.
+It will prompt you to enter a new version for the add-on and create a zip file in the root of the project called `ai-text-firefox-<version>.zip`.
 
-3. Upload the zip file to the [Firefox Add-ons site](https://addons.mozilla.org/en-US/developers/addon/aitext/versions/submit/).
+2. Upload the zip file to the [Firefox Add-ons site](https://addons.mozilla.org/en-US/developers/addon/aitext/versions/submit/).
 
 ## License
 
