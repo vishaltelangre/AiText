@@ -42,40 +42,48 @@ fi
 echo "Building the extension..."
 pnpm build
 
-# Create a temporary directory for packaging
-echo "Creating package directory..."
-TEMP_DIR="temp_package"
-rm -rf "$TEMP_DIR"
-mkdir -p "$TEMP_DIR"
+# Ensure archives directory exists
+ARCHIVES_DIR="archives"
+mkdir -p "$ARCHIVES_DIR"
 
-# Copy necessary files
-echo "Copying files..."
-cp manifest.json "$TEMP_DIR/"
-cp -r dist "$TEMP_DIR/"
-cp -r icons "$TEMP_DIR/"
-mkdir -p "$TEMP_DIR/popup"
-mkdir -p "$TEMP_DIR/options"
-cp -r popup/*.html "$TEMP_DIR/popup/"
-cp -r options/*.html "$TEMP_DIR/options/"
-cp LICENSE "$TEMP_DIR/"
+create_package() {
+    local browser=$1
+    local dist_dir="dist-$browser"
+    local zip_name="$ARCHIVES_DIR/ai-text-$browser-$NEW_VERSION.zip"
 
-# Create the zip file
-echo "Creating zip file..."
-ZIP_NAME="ai-text-firefox-$NEW_VERSION.zip"
-rm -f "$ZIP_NAME"
-cd "$TEMP_DIR"
-zip -r "../$ZIP_NAME" ./*
-cd ..
+    echo "Creating package for $browser..."
 
-# Clean up
-echo "Cleaning up..."
-rm -rf "$TEMP_DIR"
+    # Create a temporary directory for packaging
+    local temp_dir="temp_package_$browser"
+    rm -rf "$temp_dir"
+    mkdir -p "$temp_dir"
 
-echo "Package created successfully: $ZIP_NAME"
+    # Copy necessary files
+    echo "Copying files for $browser..."
+    cp -r "$dist_dir"/* "$temp_dir/"
+    cp LICENSE "$temp_dir/"
+
+    # Create the zip file
+    echo "Creating zip file for $browser..."
+    rm -f "$zip_name"
+    cd "$temp_dir"
+    zip -r "../$zip_name" ./*
+    cd ..
+
+    # Clean up
+    echo "Cleaning up $browser package..."
+    rm -rf "$temp_dir"
+
+    echo "Package created successfully: $zip_name"
+}
+
+# Create packages for both browsers
+create_package "firefox"
+create_package "chrome"
 
 # Create source code zip for Mozilla submission
 echo "Creating source code zip for Mozilla submission..."
-SOURCE_ZIP_NAME="ai-text-source-$NEW_VERSION.zip"
+SOURCE_ZIP_NAME="$ARCHIVES_DIR/ai-text-source-$NEW_VERSION.zip"
 rm -f "$SOURCE_ZIP_NAME"
 
 # Create source zip excluding node_modules, branding, .git, and temp_package directories
@@ -83,7 +91,8 @@ zip -r "$SOURCE_ZIP_NAME" . \
     -x "node_modules/*" \
     -x "branding/*" \
     -x ".git/*" \
-    -x "temp_package/*" \
+    -x "temp_package_*/*" \
+    -x "$ARCHIVES_DIR/*" \
     -x "*.zip"
 
 echo "Source code package created successfully: $SOURCE_ZIP_NAME"

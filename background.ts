@@ -13,7 +13,7 @@ const getContextMenuItems = async () => {
     const customContextMenuItems = res.data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS] || [];
     return [...DEFAULT_CONTEXT_MENU_ITEMS, ...customContextMenuItems];
   } catch (error) {
-    console.error("Error loading custom menu items:", error);
+    console.log("Error loading custom menu items:", error);
     return DEFAULT_CONTEXT_MENU_ITEMS;
   }
 };
@@ -64,7 +64,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
         return;
       }
     } catch (error) {
-      console.error("Error handling custom menu item:", error);
+      console.log("Error handling custom menu item:", error);
     }
   }
 });
@@ -108,7 +108,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") return;
 
-          console.error("Error getting active AI provider config:", error);
+          console.log("Error getting active AI provider config:", error);
           const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
           sendContentMessageToTab(tabId, {
             action: ACTIONS.MODAL_SHOW_ERROR,
@@ -118,7 +118,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
       }, 300);
     }
   } catch (error) {
-    console.error("Invalid message received:", error);
+    console.log("Invalid message received:", error);
   }
   return true;
 });

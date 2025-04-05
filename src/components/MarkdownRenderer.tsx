@@ -109,7 +109,7 @@ export const MarkdownRenderer = ({
         <React.Fragment key={index}>{domToReact(node)}</React.Fragment>
       ));
     } catch (error) {
-      console.error("Error rendering markdown:", error);
+      console.log("Error rendering markdown:", error);
       return ["Error rendering text"];
     }
   }, [content]);

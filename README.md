@@ -2,7 +2,9 @@
 
 ![AiText Banner](./branding/banner.png)
 
-A Firefox browser extension that allows you to use AI to do anything with the selected text.
+A browser extension that allows you to use AI to do anything with the selected text.
+
+**Available for both Firefox and Chrome.**
 
 ## Screenshots
 
@@ -29,6 +31,7 @@ A Firefox browser extension that allows you to use AI to do anything with the se
 - [x] Support for Gemini, OpenAI, Anthropic, and DeepSeek
 - [x] Markdown formatting for responses
 - [x] Beautiful and simple UI
+- [x] Cross-browser support (Firefox and Chrome)
 
 ## Development Setup
 
@@ -39,19 +42,19 @@ A Firefox browser extension that allows you to use AI to do anything with the se
 
 ### Development Commands
 
-Install the dependencies.
+Install the dependencies:
 
 ```bash
 pnpm install
 ```
 
-To build CSS and TypeScript files:
+To build the extension for both browsers:
 
 ```bash
 pnpm build
 ```
 
-To watch for changes and rebuild on changes:
+To watch for changes and rebuild on changes for both browsers:
 
 ```bash
 pnpm watch
@@ -59,7 +62,7 @@ pnpm watch
 
 ### Loading the add-on in Firefox
 
-1. Build the add-on.
+1. Build the extension:
 
 ```bash
 pnpm build
@@ -71,35 +74,64 @@ pnpm build
 
 4. Click "Load Temporary Add-on".
 
-5. Navigate to your project directory and select the `manifest.json` file.
+5. Select the `dist-firefox/manifest.json` file.
 
 6. The add-on should now be loaded and visible in the browser toolbar.
 
+### Loading the extension in Chrome
+
+1. Build the extension:
+
+```bash
+pnpm build
+```
+
+2. Open Chrome and navigate to `chrome://extensions`.
+
+3. Enable "Developer mode" in the top right.
+
+4. Click "Load unpacked".
+
+5. Select the `dist-chrome` folder.
+
+6. The extension should now be loaded and visible in the browser toolbar.
+
 ### Development Workflow
 
-1. Run the watch command to automatically rebuild on changes.
+1. Run the watch command to automatically rebuild on changes:
 
    ```bash
    pnpm watch
    ```
 
-2. After making changes and the build completes, go back to `about:debugging` and find the AiText add-on in the list.
+2. After making changes and the build completes:
+   - For Firefox: Go to `about:debugging`, find AiText and click "Reload"
+   - For Chrome: Go to `chrome://extensions`, find AiText and click the refresh icon
 
-3. Click the "Reload" button to update the add-on.
-
-Note: The add-on will need to be reloaded in Firefox after each build to see your changes. Temporary add-ons are removed when Firefox is closed and will need to be loaded again the next time you open Firefox.
+Note: Temporary add-ons/extensions are removed when the browser is closed and will need to be loaded again the next time you open the browser.
 
 ## Packaging
 
-1. To package the add-on for distribution:
+To package the extension for distribution:
 
 ```bash
 pnpm package
 ```
 
-It will prompt you to enter a new version for the add-on and create a zip file in the root of the project called `ai-text-firefox-<version>.zip`.
+This will:
 
-2. Upload the zip file to the [Firefox Add-ons site](https://addons.mozilla.org/en-US/developers/addon/aitext/versions/submit/).
+1. Prompt for a new version (or keep the current one)
+2. Update version in manifest.json and package.json
+3. Build the extension for both Firefox and Chrome
+4. Create the following files in the `archives` directory:
+   - `ai-text-firefox-<version>.zip` - Firefox distribution package
+   - `ai-text-chrome-<version>.zip` - Chrome distribution package
+   - `ai-text-source-<version>.zip` - Source code package for Mozilla review
+
+Upload the appropriate zip file to:
+
+- Firefox: [Firefox Add-ons site](https://addons.mozilla.org/en-US/developers/addon/aitext/versions/submit/)
+- Chrome: [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
 
 ## License
 

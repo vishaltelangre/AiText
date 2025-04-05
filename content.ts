@@ -113,7 +113,7 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
       handleShowErrorMessage(data);
     }
   } catch (error) {
-    console.error("Error processing message:", error);
+    console.log("Error processing message:", error);
   }
 });
 

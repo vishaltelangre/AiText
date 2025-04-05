@@ -1,5 +1,8 @@
-dist/
 node_modules/
+dist/
+dist-firefox/
+dist-chrome/
+.DS_Store
+archives/
+*.zip
 temp_package/
-ai-text-*.zip
-ai-text-source-*.zip

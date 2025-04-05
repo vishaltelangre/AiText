@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "AiText",
   "version": "1.0.2",
   "description": "Use AI to do anything with the selected text!",
@@ -13,33 +13,36 @@
     "96": "icons/icon-96.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": [
-    "contextMenus",
-    "storage",
-    "activeTab",
-    "https://generativelanguage.googleapis.com/*",
-    "https://api.openai.com/*",
-    "https://api.anthropic.com/*",
-    "https://api.deepseek.com/*"
-  ],
+  "permissions": ["contextMenus", "storage", "activeTab"],
   "background": {
-    "scripts": ["dist/background.js"]
+    "scripts": ["background.js"],
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["dist/output.css"],
-      "js": ["dist/content.js"]
+      "css": ["output.css"],
+      "js": ["content.js"]
     }
   ],
-  "browser_action": {
-    "default_icon": "icons/icon-128.png",
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png",
+      "128": "icons/icon-128.png"
+    },
     "default_title": "AiText",
     "default_popup": "popup/popup.html"
   },
-  "web_accessible_resources": ["icons/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "options_ui": {
     "page": "options/options.html",
-    "browser_style": true
+    "open_in_tab": true
   }
 }
