@@ -1,6 +1,6 @@
 {
   "name": "ai-text",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Use AI to do anything with the selected text!",
   "scripts": {
     "build:css:firefox": "tailwindcss -i ./src/input.css -o ./dist-firefox/output.css --minify",
