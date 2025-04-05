@@ -4,6 +4,7 @@ import { Modal } from "@/components/Modal";
 import { Message, MessageSchema } from "@/schemas";
 import { MODAL_EVENT_NAME, ACTIONS } from "@/constants";
 import { sendRuntimeMessage, dispatchModalEvent } from "@/utils";
+import DOMPurify from "dompurify";
 
 let selectedRange: Range | null = null;
 
@@ -76,8 +77,11 @@ function handleShowProcessedTextMessage(
       parentElement && isEditableElement(parentElement)
         ? () => {
             if (selectedRange) {
+              const sanitizedText = DOMPurify.sanitize(message.result, { ALLOWED_TAGS: [] });
               selectedRange.deleteContents();
-              selectedRange.insertNode(document.createTextNode(message.result));
+              const textNode = document.createTextNode(sanitizedText);
+              selectedRange.insertNode(textNode);
+              selectedRange.collapse(false);
             }
           }
         : undefined,

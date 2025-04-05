@@ -2,8 +2,11 @@ const path = require("path");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
   devtool: "source-map",
+  optimization: {
+    minimize: false, // Disable minification
+  },
   entry: {
     background: "./background.ts",
     content: "./content.ts",
@@ -30,10 +33,6 @@ module.exports = {
           },
         ],
         exclude: /node_modules/,
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
   },
