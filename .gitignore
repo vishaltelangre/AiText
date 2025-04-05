@@ -2,3 +2,4 @@ dist/
 node_modules/
 temp_package/
 ai-text-*.zip
+ai-text-source-*.zip

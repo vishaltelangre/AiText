@@ -72,3 +72,18 @@ echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
 
 echo "Package created successfully: $ZIP_NAME"
+
+# Create source code zip for Mozilla submission
+echo "Creating source code zip for Mozilla submission..."
+SOURCE_ZIP_NAME="ai-text-source-$NEW_VERSION.zip"
+rm -f "$SOURCE_ZIP_NAME"
+
+# Create source zip excluding node_modules, branding, .git, and temp_package directories
+zip -r "$SOURCE_ZIP_NAME" . \
+    -x "node_modules/*" \
+    -x "branding/*" \
+    -x ".git/*" \
+    -x "temp_package/*" \
+    -x "*.zip"
+
+echo "Source code package created successfully: $SOURCE_ZIP_NAME"
