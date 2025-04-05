@@ -1,5 +1,13 @@
-import { Message, MessageSchema, StorageData, StorageDataSchema } from "@/schemas";
-import { MODAL_EVENT_NAME, STORAGE_KEYS } from "@/constants";
+import {
+  AiProviderConfig,
+  AiProvidersConfigs,
+  AiProviderType,
+  Message,
+  MessageSchema,
+  StorageData,
+  StorageDataSchema,
+} from "@/schemas";
+import { DEFAULT_AI_PROVIDERS_CONFIGS, MODAL_EVENT_NAME, STORAGE_KEYS } from "@/constants";
 
 // Sends a message to the background script
 export function sendRuntimeMessage<T extends Message>(message: T) {
@@ -37,12 +45,23 @@ export async function getStorageData(keys: (keyof StorageData)[]) {
 export async function getActiveAiProviderConfig() {
   const { success, data } = await getStorageData([STORAGE_KEYS.AI_PROVIDERS_CONFIGS]);
   if (!success) throw new Error("Failed to get AI providers configs");
-  const configs = data[STORAGE_KEYS.AI_PROVIDERS_CONFIGS];
-  console.log("configs", configs, data, STORAGE_KEYS.AI_PROVIDERS_CONFIGS);
-  if (!configs) throw new Error("No AI providers configs");
-  const activeProvider = configs.activeProvider;
-  if (!activeProvider) throw new Error("No active AI provider");
-  const config = configs.providers[activeProvider];
-  if (!config) throw new Error("No active AI provider config");
-  return config;
+  const configs = data[STORAGE_KEYS.AI_PROVIDERS_CONFIGS] || DEFAULT_AI_PROVIDERS_CONFIGS;
+  return getAiProviderConfig(configs.activeProvider, configs);
 }
+
+export const getAiProviderConfig = (
+  type: AiProviderType,
+  aiProvidersConfigs: AiProvidersConfigs
+): AiProviderConfig => {
+  const defaultConfig = DEFAULT_AI_PROVIDERS_CONFIGS.providers[type];
+  const userConfig = aiProvidersConfigs.providers[type];
+
+  return {
+    type,
+    name: userConfig?.name ?? defaultConfig.name ?? "",
+    apiKey: userConfig?.apiKey ?? defaultConfig.apiKey ?? "",
+    baseUrl: userConfig?.baseUrl ?? defaultConfig.baseUrl ?? "",
+    getApiKeyUrl: userConfig?.getApiKeyUrl ?? defaultConfig.getApiKeyUrl ?? "",
+    model: userConfig?.model ?? defaultConfig.model ?? "",
+  };
+};

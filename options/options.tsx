@@ -15,7 +15,7 @@ import {
   DEFAULT_CONTEXT_MENU_ITEMS,
   STORAGE_KEYS,
 } from "@/constants";
-import { getStorageData, setStorageData } from "@/utils";
+import { getAiProviderConfig, getStorageData, setStorageData } from "@/utils";
 
 type AlertType = "success" | "error";
 type LoadingType = "save-configs" | "test-api-connectivity";
@@ -246,22 +246,8 @@ const ApiSettingsTab = ({
     }
   };
 
-  const getAiProviderConfig = (type: AiProviderType): AiProviderConfig => {
-    const defaultConfig = DEFAULT_AI_PROVIDERS_CONFIGS.providers[type];
-    const userConfig = aiProvidersConfigs.providers[type];
-
-    return {
-      type,
-      name: userConfig?.name ?? defaultConfig.name ?? "",
-      apiKey: userConfig?.apiKey ?? defaultConfig.apiKey ?? "",
-      baseUrl: userConfig?.baseUrl ?? defaultConfig.baseUrl ?? "",
-      getApiKeyUrl: userConfig?.getApiKeyUrl ?? defaultConfig.getApiKeyUrl ?? "",
-      model: userConfig?.model ?? defaultConfig.model ?? "",
-    };
-  };
-
   const renderProviderSettings = (type: AiProviderType) => {
-    const config = getAiProviderConfig(type);
+    const config = getAiProviderConfig(type, aiProvidersConfigs);
     const defaultConfig = DEFAULT_AI_PROVIDERS_CONFIGS.providers[type];
 
     return (
