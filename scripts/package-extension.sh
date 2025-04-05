@@ -18,8 +18,10 @@ echo "Copying files..."
 cp manifest.json "$TEMP_DIR/"
 cp -r dist "$TEMP_DIR/"
 cp -r icons "$TEMP_DIR/"
-cp -r popup "$TEMP_DIR/"
-cp -r options "$TEMP_DIR/"
+mkdir -p "$TEMP_DIR/popup"
+mkdir -p "$TEMP_DIR/options"
+cp -r popup/*.html "$TEMP_DIR/popup/"
+cp -r options/*.html "$TEMP_DIR/options/"
 cp LICENSE "$TEMP_DIR/"
 
 # Create the zip file
