@@ -6,6 +6,7 @@ import {
   AiProviderConfig,
   AiProvidersConfigs,
   AiProviderType,
+  MessageSchema,
 } from "@/schemas";
 import { CrossIcon, VisibilityEyeIcon, LockIcon } from "@/components/Icons";
 import { createAiProvider } from "@/data";
@@ -14,6 +15,7 @@ import {
   DEFAULT_AI_PROVIDERS_CONFIGS,
   DEFAULT_CONTEXT_MENU_ITEMS,
   STORAGE_KEYS,
+  ACTIONS,
 } from "@/constants";
 import { getAiProviderConfig, getStorageData, setStorageData } from "@/utils";
 
@@ -44,6 +46,19 @@ const Options = () => {
 
     // Set page's title
     document.title = `${browser.runtime.getManifest().name} - Settings`;
+
+    // Listen for tab switch messages
+    const messageListener = (message: unknown) => {
+      const { success, data } = MessageSchema.safeParse(message);
+      if (!success) return;
+
+      if (data.action === ACTIONS.SWITCH_TO_CONTEXT_MENU_ITEMS_OPTIONS_TAB) {
+        setActiveTab("menu");
+      }
+    };
+
+    browser.runtime.onMessage.addListener(messageListener);
+    return () => browser.runtime.onMessage.removeListener(messageListener);
   }, []);
 
   const showAlert = (message: string, type: AlertType, autoHideTimeout = 5000) => {

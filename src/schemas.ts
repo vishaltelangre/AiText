@@ -94,6 +94,9 @@ export const MessageSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal(ACTIONS.MODAL_CLOSE),
   }),
+  z.object({
+    action: z.literal(ACTIONS.SWITCH_TO_CONTEXT_MENU_ITEMS_OPTIONS_TAB),
+  }),
 ]);
 
 export type Message = z.infer<typeof MessageSchema>;

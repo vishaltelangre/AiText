@@ -6,15 +6,14 @@ import { createAiProvider } from "@/data";
 const commonInstruction =
   "Format your response in markdown. Use markdown features where appropriate to improve readability making it clear and well-structured. Don't say 'Here's a ...' or anything like that. Just return the text.";
 
-const getContextMenuItems = async () => {
+const getCustomContextMenuItems = async () => {
   try {
     const res = await getStorageData([STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS]);
-    if (!res.success) return DEFAULT_CONTEXT_MENU_ITEMS;
-    const customContextMenuItems = res.data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS] || [];
-    return [...DEFAULT_CONTEXT_MENU_ITEMS, ...customContextMenuItems];
+    if (!res.success) return [];
+    return res.data[STORAGE_KEYS.CUSTOM_CONTEXT_MENU_ITEMS] || [];
   } catch (error) {
     console.log("Error loading custom menu items:", error);
-    return DEFAULT_CONTEXT_MENU_ITEMS;
+    return [];
   }
 };
 
@@ -29,15 +28,49 @@ const createContextMenu = async () => {
     contexts: ["selection"],
   });
 
-  // Add menu items
-  const contextMenuItems = await getContextMenuItems();
-  contextMenuItems.forEach((item) => {
+  // Add default menu items
+  DEFAULT_CONTEXT_MENU_ITEMS.forEach((item) => {
     browser.contextMenus.create({
       id: item.id,
       parentId: "ait-context-menu",
       title: item.title,
       contexts: ["selection"],
     });
+  });
+
+  // Add custom menu items
+  const customContextMenuItems = await getCustomContextMenuItems();
+  if (customContextMenuItems.length > 0) {
+    // Add separator
+    browser.contextMenus.create({
+      id: "ait-custom-context-menu-separator",
+      parentId: "ait-context-menu",
+      type: "separator",
+      contexts: ["selection"],
+    });
+
+    customContextMenuItems.forEach((item) => {
+      browser.contextMenus.create({
+        id: item.id,
+        parentId: "ait-context-menu",
+        title: item.title,
+        contexts: ["selection"],
+      });
+    });
+  }
+
+  browser.contextMenus.create({
+    id: "ait-add-custom-instruction-separator",
+    parentId: "ait-context-menu",
+    type: "separator",
+    contexts: ["selection"],
+  });
+
+  browser.contextMenus.create({
+    id: "ait-add-custom-instruction",
+    parentId: "ait-context-menu",
+    title: "✨ Add custom instruction...",
+    contexts: ["selection"],
   });
 };
 
@@ -49,9 +82,22 @@ browser.storage.onChanged.addListener((changes) => {
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.selectionText && tab?.id) {
+    // Handle custom instructions menu item
+    if (info.menuItemId === "ait-add-custom-instruction") {
+      browser.runtime.openOptionsPage();
+      // Send a message to the options page to switch to the "Context Menu Items" tab
+      setTimeout(() => {
+        browser.runtime.sendMessage({ action: ACTIONS.SWITCH_TO_CONTEXT_MENU_ITEMS_OPTIONS_TAB });
+      }, 100);
+      return;
+    }
+
     // Check default menu items first
     try {
-      const contextMenuItems = await getContextMenuItems();
+      const contextMenuItems = [
+        ...DEFAULT_CONTEXT_MENU_ITEMS,
+        ...(await getCustomContextMenuItems()),
+      ];
       const contextMenuItem = contextMenuItems.find((item) => item.id === info.menuItemId);
       if (contextMenuItem) {
         sendContentMessageToTab(tab.id, {

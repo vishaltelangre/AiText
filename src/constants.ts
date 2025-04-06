@@ -18,6 +18,7 @@ export const ACTIONS = {
   MODAL_SHOW_PROCESSED_TEXT: `${UNIQUE_PREFIX}-modal-showProcessedText`,
   MODAL_SHOW_ERROR: `${UNIQUE_PREFIX}-modal-showError`,
   MODAL_CLOSE: `${UNIQUE_PREFIX}-modal-close`,
+  SWITCH_TO_CONTEXT_MENU_ITEMS_OPTIONS_TAB: `${UNIQUE_PREFIX}-switchToContextMenuItemsOptionsTab`,
 } as const;
 
 export const DEFAULT_INSTRUCTION_TYPES = [
