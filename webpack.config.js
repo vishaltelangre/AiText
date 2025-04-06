@@ -81,6 +81,7 @@ module.exports = {
   devtool: "source-map",
   optimization: {
     minimize: false, // Disable minification
+    minimizer: [], // Explicitly set empty minimizer
   },
   entry: {
     background: "./background.ts",

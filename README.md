@@ -4,7 +4,7 @@
 
 A browser extension that allows you to use AI to do anything with the selected text.
 
-**Available for both Firefox and Chrome.**
+[**Available for both Firefox and Chrome.**](https://github.com/vishaltelangre/AiText/releases/latest)
 
 ## Screenshots
 
