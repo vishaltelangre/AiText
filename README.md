@@ -6,7 +6,7 @@ A browser extension that allows you to use AI to do anything with the selected t
 
 ## Download
 
-<a href="https://github.com/vishaltelangre/AiText/releases/latest" target="_blank">
+<a href="https://chromewebstore.google.com/detail/khcgdcmhokmfibcbbnpnfijpddpkpofi" target="_blank">
    <img src="./icons/chrome-web-store-badge.png" alt="Install in Chrome" height="60" />
 </a>
 <a href="https://addons.mozilla.org/en-US/firefox/addon/AiText" target="_blank">
