@@ -4,7 +4,16 @@
 
 A browser extension that allows you to use AI to do anything with the selected text.
 
-[**Available for both Firefox and Chrome.**](https://github.com/vishaltelangre/AiText/releases/latest)
+## Download
+
+<a href="https://github.com/vishaltelangre/AiText/releases/latest" target="_blank">
+   <img src="./icons/chrome-web-store-badge.png" alt="Install in Chrome" height="60" />
+</a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/AiText" target="_blank">
+   <img src="./icons/firefox-get-the-addon-badge.png" alt="Install in Firefox" height="60" />
+</a>
+
+Or, manually download and install from the ZIP files in the [latest release](https://github.com/vishaltelangre/AiText/releases/latest).
 
 ## Screenshots
 
