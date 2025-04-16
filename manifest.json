@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AiText",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Use AI to do anything with the selected text!",
   "browser_specific_settings": {
     "gecko": {
