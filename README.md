@@ -36,6 +36,7 @@ Or, manually download and install from the ZIP files in the [latest release](htt
 - [x] Select any text and right click to get a list of AI actions to perform with the selected text
 - [x] Sensible and useful default context menu actions
 - [x] Easily add custom context menu actions as needed
+- [x] Re-generate the result differently if you don't like it
 - [x] Ability to configure an AI provider, model, and API key
 - [x] Support for Gemini, OpenAI, Anthropic, and DeepSeek
 - [x] Markdown formatting for responses

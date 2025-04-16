@@ -28,19 +28,21 @@ function ensureModalRootExists() {
 }
 
 function handleProcessTextMessage(message: Message & { action: typeof ACTIONS.PROCESS_TEXT }) {
-  if (message.text.trim() === "") return;
+  if (message.originalText.trim() === "") return;
 
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_LOADING,
     operation: message.operation,
     instructionType: message.instructionType,
+    instruction: message.instruction,
+    originalText: message.originalText,
   });
 
   toggleBodyScroll(true);
 
   sendRuntimeMessage({
     action: ACTIONS.CALL_AI_API,
-    text: message.text,
+    originalText: message.originalText,
     instruction: message.instruction,
     operation: message.operation,
     instructionType: message.instructionType,
@@ -54,6 +56,7 @@ function handleShowProcessedTextMessage(
     action: ACTIONS.MODAL_SHOW_PROCESSED_TEXT,
     operation: message.operation,
     instructionType: message.instructionType,
+    instruction: message.instruction,
     originalText: message.originalText,
     result: message.result,
   });
@@ -63,6 +66,10 @@ function handleShowErrorMessage(message: Message & { action: typeof ACTIONS.MODA
   dispatchModalEvent({
     action: ACTIONS.MODAL_SHOW_ERROR,
     error: message.error || "An error occurred",
+    operation: message.operation,
+    instructionType: message.instructionType,
+    instruction: message.instruction,
+    originalText: message.originalText,
   });
 }
 
@@ -97,5 +104,10 @@ window.addEventListener(MODAL_EVENT_NAME, ((event: CustomEvent) => {
     toggleBodyScroll(false);
   } else if (data.action === ACTIONS.OPEN_SETTINGS_PAGE) {
     sendRuntimeMessage({ action: ACTIONS.OPEN_SETTINGS_PAGE });
+  } else if (data.action === ACTIONS.RETRY_PROCESS_TEXT) {
+    handleProcessTextMessage({
+      ...data,
+      action: ACTIONS.PROCESS_TEXT,
+    });
   }
 }) as EventListener);

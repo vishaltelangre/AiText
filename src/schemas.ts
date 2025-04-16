@@ -50,52 +50,53 @@ export type StorageData = z.infer<typeof StorageDataSchema>;
 // Allow both default and custom instruction types
 export const InstructionTypeSchema = z.string();
 
+const messageCommonFieldsSchema = z.object({
+  originalText: z.string(),
+  instruction: z.string(),
+  operation: z.string(),
+  instructionType: InstructionTypeSchema,
+});
+
 export const MessageSchema = z.discriminatedUnion("action", [
   z.object({
+    ...messageCommonFieldsSchema.shape,
     action: z.literal(ACTIONS.PROCESS_TEXT),
-    text: z.string(),
-    instruction: z.string(),
-    operation: z.string(),
-    instructionType: InstructionTypeSchema,
   }),
   z.object({
+    ...messageCommonFieldsSchema.shape,
+    action: z.literal(ACTIONS.RETRY_PROCESS_TEXT),
+  }),
+  z.object({
+    ...messageCommonFieldsSchema.shape,
     action: z.literal(ACTIONS.CALL_AI_API),
-    text: z.string(),
-    instruction: z.string(),
-    operation: z.string(),
-    instructionType: InstructionTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.SHOW_PROCESSED_TEXT),
-    operation: z.string(),
-    originalText: z.string(),
+    ...messageCommonFieldsSchema.shape,
     result: z.string(),
-    instructionType: InstructionTypeSchema,
+    action: z.literal(ACTIONS.SHOW_PROCESSED_TEXT),
   }),
   z.object({
-    action: z.literal(ACTIONS.OPEN_SETTINGS_PAGE),
-  }),
-  z.object({
+    ...messageCommonFieldsSchema.shape,
     action: z.literal(ACTIONS.MODAL_SHOW_ERROR),
     error: z.string().optional(),
   }),
   z.object({
+    ...messageCommonFieldsSchema.shape,
     action: z.literal(ACTIONS.MODAL_SHOW_LOADING),
-    operation: z.string(),
-    instructionType: InstructionTypeSchema,
   }),
   z.object({
-    action: z.literal(ACTIONS.MODAL_SHOW_PROCESSED_TEXT),
-    operation: z.string(),
-    instructionType: InstructionTypeSchema,
-    originalText: z.string(),
+    ...messageCommonFieldsSchema.shape,
     result: z.string(),
+    action: z.literal(ACTIONS.MODAL_SHOW_PROCESSED_TEXT),
   }),
   z.object({
     action: z.literal(ACTIONS.MODAL_CLOSE),
   }),
   z.object({
     action: z.literal(ACTIONS.SWITCH_TO_CONTEXT_MENU_ITEMS_OPTIONS_TAB),
+  }),
+  z.object({
+    action: z.literal(ACTIONS.OPEN_SETTINGS_PAGE),
   }),
 ]);
 

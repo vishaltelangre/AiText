@@ -11,6 +11,7 @@ export const MODAL_EVENT_NAME = `${UNIQUE_PREFIX}-modal-event`;
 
 export const ACTIONS = {
   PROCESS_TEXT: `${UNIQUE_PREFIX}-processText`,
+  RETRY_PROCESS_TEXT: `${UNIQUE_PREFIX}-retryProcessText`,
   CALL_AI_API: `${UNIQUE_PREFIX}-callAiApi`,
   SHOW_PROCESSED_TEXT: `${UNIQUE_PREFIX}-showProcessedText`,
   OPEN_SETTINGS_PAGE: `${UNIQUE_PREFIX}-openSettingsPage`,

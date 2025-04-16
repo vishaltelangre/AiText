@@ -12,6 +12,7 @@ import {
   SparklesIcon,
   ClipboardIcon,
   SettingsIcon,
+  RefreshIcon,
 } from "@/components/Icons";
 import { MessageSchema, type InstructionType } from "@/schemas";
 import { dispatchModalEvent } from "@/utils";
@@ -28,6 +29,7 @@ type ModalState =
   | {
       type: "result";
       instructionType: InstructionType;
+      instruction: string;
       operation: string;
       originalText: string;
       result: string;
@@ -35,6 +37,10 @@ type ModalState =
   | {
       type: "error";
       errorMessage: string;
+      instructionType: InstructionType;
+      instruction: string;
+      operation: string;
+      originalText: string;
     };
 
 function isDefaultInstructionType(type: InstructionType): type is DefaultInstructionType {
@@ -162,6 +168,7 @@ const CopyToClipboard = ({ text }: { text: string }) => {
 
 type ResultModalProps = {
   instructionType: InstructionType;
+  instruction: string;
   operation: string;
   originalText: string;
   result: string;
@@ -170,6 +177,7 @@ type ResultModalProps = {
 
 const ResultModal = ({
   instructionType,
+  instruction,
   operation,
   originalText,
   result,
@@ -201,6 +209,22 @@ const ResultModal = ({
               <SparklesIcon />
               <h3 className="ait-font-medium ait-text-gray-700">Result</h3>
             </div>
+            <div className="ait-flex ait-items-center ait-gap-2">
+              <Button
+                variant="icon"
+                onClick={() =>
+                  void handleRetry({
+                    originalText,
+                    instruction,
+                    operation,
+                    instructionType,
+                  })
+                }
+                title="Regenerate"
+              >
+                <RefreshIcon />
+              </Button>
+            </div>
             <CopyToClipboard text={result} />
           </div>
           <div className="ait-grow ait-overflow-y-auto ait-bg-white ait-px-6 ait-py-4">
@@ -214,24 +238,45 @@ const ResultModal = ({
   );
 };
 
+const handleRetry = (message: {
+  originalText: string;
+  instruction: string;
+  operation: string;
+  instructionType: InstructionType;
+}) =>
+  dispatchModalEvent({
+    ...message,
+    action: ACTIONS.RETRY_PROCESS_TEXT,
+  });
+
 type ErrorModalProps = {
+  instructionType: InstructionType;
+  instruction: string;
+  operation: string;
+  originalText: string;
   errorMessage: string;
   onClose: () => void;
 };
 
-const ErrorModal = ({ errorMessage, onClose }: ErrorModalProps) => {
+const ErrorModal = ({ onClose, errorMessage, ...props }: ErrorModalProps) => {
   return (
     <ModalLayout
       title="Error"
       onClose={onClose}
       footer={
-        <Button
-          variant="secondary"
-          onClick={() => dispatchModalEvent({ action: ACTIONS.OPEN_SETTINGS_PAGE })}
-        >
-          <SettingsIcon />
-          Check settings
-        </Button>
+        <div className="ait-flex ait-items-center ait-gap-2">
+          <Button variant="secondary" onClick={() => void handleRetry(props)}>
+            <RefreshIcon />
+            Retry
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => dispatchModalEvent({ action: ACTIONS.OPEN_SETTINGS_PAGE })}
+          >
+            <SettingsIcon />
+            Check settings
+          </Button>
+        </div>
       }
     >
       <div className="ait-flex ait-flex-col ait-p-6">
@@ -259,6 +304,7 @@ export const Modal = () => {
         setState({
           type: "result",
           instructionType: data.instructionType,
+          instruction: data.instruction,
           operation: data.operation,
           originalText: data.originalText,
           result: data.result,
@@ -267,6 +313,10 @@ export const Modal = () => {
         setState({
           type: "error",
           errorMessage: data.error || "An unknown error occurred",
+          instructionType: data.instructionType,
+          instruction: data.instruction,
+          operation: data.operation,
+          originalText: data.originalText,
         });
       } else if (data.action === ACTIONS.MODAL_CLOSE) {
         setState({ type: "closed" });
@@ -279,7 +329,8 @@ export const Modal = () => {
     };
   }, []);
 
-  const handleClose = () => dispatchModalEvent({ action: ACTIONS.MODAL_CLOSE });
+  const handleClose = () =>
+    state.type !== "closed" && dispatchModalEvent({ action: ACTIONS.MODAL_CLOSE });
 
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -315,13 +366,21 @@ export const Modal = () => {
           ) : state.type === "result" ? (
             <ResultModal
               instructionType={state.instructionType}
+              instruction={state.instruction}
               operation={state.operation}
               originalText={state.originalText}
               result={state.result}
               onClose={handleClose}
             />
           ) : state.type === "error" ? (
-            <ErrorModal errorMessage={state.errorMessage} onClose={handleClose} />
+            <ErrorModal
+              errorMessage={state.errorMessage}
+              instructionType={state.instructionType}
+              instruction={state.instruction}
+              operation={state.operation}
+              originalText={state.originalText}
+              onClose={handleClose}
+            />
           ) : null}
         </div>
       </div>

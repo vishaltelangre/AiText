@@ -103,7 +103,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
         sendContentMessageToTab(tab.id, {
           action: ACTIONS.PROCESS_TEXT,
           operation: contextMenuItem.title,
-          text: info.selectionText,
+          originalText: info.selectionText,
           instruction: contextMenuItem.instruction + " " + commonInstruction,
           instructionType: contextMenuItem.id,
         });
@@ -140,7 +140,7 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
         try {
           const config = await getActiveAiProviderConfig();
           const result = await createAiProvider(config.type, config).callApi(
-            data.text,
+            data.originalText,
             data.instruction,
             abortController?.signal
           );
@@ -148,7 +148,8 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
             action: ACTIONS.SHOW_PROCESSED_TEXT,
             operation: data.operation,
             result,
-            originalText: data.text,
+            originalText: data.originalText,
+            instruction: data.instruction,
             instructionType: data.instructionType,
           });
         } catch (error) {
@@ -159,6 +160,10 @@ browser.runtime.onMessage.addListener((message: unknown, sender) => {
           sendContentMessageToTab(tabId, {
             action: ACTIONS.MODAL_SHOW_ERROR,
             error: errorMessage,
+            instructionType: data.instructionType,
+            instruction: data.instruction,
+            operation: data.operation,
+            originalText: data.originalText,
           });
         }
       }, 300);
